@@ -24,6 +24,7 @@ internal class SourceFile
             throw new Exception();
 
         Title = generalRows.Single(r => r.Key == "Title").Value;
+        Description = generalRows.Single(r => r.Key == "Description").Value;
 
 
         // Parse Nodes Tab
@@ -39,14 +40,28 @@ internal class SourceFile
 
         var nodes = Parse(nodeRows).ToArray();
 
-        // Parse Software Systems
         Persons = nodes.OfType<Person>().ToArray();
         SoftwareSystems = nodes.OfType<SoftwareSystem>().ToArray();
         Containers = nodes.OfType<Container>().ToArray();
         Components = nodes.OfType<Component>().ToArray();
+
+
+        // Parse Edges Tab
+        var edgeRows = fileName.ExcelToEnumerable<EdgeRow>(
+            x => x.
+                UsingSheet("Edges")
+                .HeaderOnRow(2)
+                .StartingFromRow(3)
+                .OutputExceptionsTo(exceptionList)
+                .Property(x => x.Row).MapsToRowNumber()
+            );
+
+        if (exceptionList.Any())
+            throw new Exception();
     }
 
     public string Title { get; init; }
+    public string Description { get; init; }
 
     public IEnumerable<Person> Persons { get; init; }
     public IEnumerable<SoftwareSystem> SoftwareSystems { get; init; }
@@ -76,7 +91,8 @@ internal class SourceFile
                 // Person
                 n = new Person(row.PersonKey)
                 {
-                    Name = row.Name
+                    Name = row.Name,
+                    Description = row.Description
                 };
             }
             if (row.IsSoftwareSystemRow)
@@ -225,6 +241,17 @@ internal class SourceFile
         //    string.IsNullOrWhiteSpace(Deprecated) &&
         //    string.IsNullOrWhiteSpace(Description);
     }
+
+    private class EdgeRow
+    {
+        public int Row { get; init; }
+        public string From { get; init; }
+        public string To { get; init; }
+        public string A { get; init; }
+        public string B { get; init; }
+        public string E { get; init; }
+        public string F { get; init; }
+    }
 }
 
 internal class Node
@@ -237,6 +264,8 @@ internal class Node
     public string Key { get; init; }
 
     public string Name { get; init; }
+
+    public string Description { get; init; }
 
     public override string ToString() => $"{this.GetType().Name}-{Key}";
 }
@@ -252,8 +281,6 @@ internal class SoftwareSystem : Node
     {
     }
 
-    public string Description { get; init; }
-
     public List<Container> Children { get; } = new List<Container>();
 }
 
@@ -266,8 +293,6 @@ internal class Container : Node
 
     public string Technology { get; init; }
 
-    public string Description { get; init; }
-
     public List<Component> Children { get; } = new List<Component>();
 }
 
@@ -279,7 +304,5 @@ internal class Component : Node
     }
 
     public string Technology { get; init; }
-
-    public string Description { get; init; }
 }
 
