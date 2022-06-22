@@ -75,7 +75,10 @@ internal class SourceFile
             if (row.IsPersonRow)
             {
                 // Person
-                n = new Person(row.PersonKey);
+                n = new Person(row.PersonKey)
+                {
+                    Name = row.Name
+                };
             }
             if (row.IsSoftwareSystemRow)
             {
@@ -85,6 +88,7 @@ internal class SourceFile
                 // Software System
                 n = new SoftwareSystem(row.SoftwareSystemKey)
                 {
+                    Name = row.Name,
                     Description = row.Description
                 };
             }
@@ -97,6 +101,7 @@ internal class SourceFile
                 var parent = (SoftwareSystem)nodes[row.SoftwareSystemKey];
                 n = new Container(parent, row.ContainerKey)
                 {
+                    Name = row.Name,
                     Description = row.Description,
                     Technology = row.Technology
                 };
@@ -110,6 +115,7 @@ internal class SourceFile
                 var parent = (Container)nodes[row.ContainerKey];
                 n = new Component(parent, row.ComponentKey)
                 {
+                    Name = row.Name,
                     Description = row.Description,
                     Technology = row.Technology
                 };
@@ -161,6 +167,8 @@ internal class SourceFile
         public string SoftwareSystemKey { get; init; }
         public string ContainerKey { get; init; }
         public string ComponentKey { get; init; }
+
+        public string Name { get; init; }
         public string Technology { get; init; }
         public string Owner { get; init; }
         public string Deprecated { get; init; }
@@ -170,25 +178,29 @@ internal class SourceFile
             !string.IsNullOrWhiteSpace(PersonKey) &&
             string.IsNullOrWhiteSpace(SoftwareSystemKey) &&
             string.IsNullOrWhiteSpace(ContainerKey) &&
-            string.IsNullOrWhiteSpace(ComponentKey);
+            string.IsNullOrWhiteSpace(ComponentKey) &&
+            !string.IsNullOrWhiteSpace(Name);
 
         internal bool IsSoftwareSystemRow =>
             string.IsNullOrWhiteSpace(PersonKey) &&
             !string.IsNullOrWhiteSpace(SoftwareSystemKey) &&
             string.IsNullOrWhiteSpace(ContainerKey) &&
-            string.IsNullOrWhiteSpace(ComponentKey);
+            string.IsNullOrWhiteSpace(ComponentKey) &&
+            !string.IsNullOrWhiteSpace(Name);
 
         internal bool IsContainerRow =>
             string.IsNullOrWhiteSpace(PersonKey) &&
             !string.IsNullOrWhiteSpace(SoftwareSystemKey) &&
             !string.IsNullOrWhiteSpace(ContainerKey) &&
-            string.IsNullOrWhiteSpace(ComponentKey);
+            string.IsNullOrWhiteSpace(ComponentKey) &&
+            !string.IsNullOrWhiteSpace(Name);
 
         internal bool IsComponentRow =>
             string.IsNullOrWhiteSpace(PersonKey) &&
             !string.IsNullOrWhiteSpace(SoftwareSystemKey) &&
             !string.IsNullOrWhiteSpace(ContainerKey) &&
-            !string.IsNullOrWhiteSpace(ComponentKey);
+            !string.IsNullOrWhiteSpace(ComponentKey) &&
+            !string.IsNullOrWhiteSpace(Name);
 
         //internal bool IsValidPersonRow =>
         //    !string.IsNullOrWhiteSpace(PersonKey) &&
@@ -244,6 +256,8 @@ internal class Node
     }
 
     public string Key { get; init; }
+
+    public string Name { get; init; }
 
     public override string ToString() => $"{this.GetType().Name}-{Key}";
 }
