@@ -27,7 +27,7 @@ internal class SourceFile
 
 
         // Parse Nodes Tab
-        var nodes = fileName.ExcelToEnumerable<NodeRow>(
+        var nodeRows = fileName.ExcelToEnumerable<NodeRow>(
             x => x
                 .UsingSheet("Nodes")
                 .OutputExceptionsTo(exceptionList)
@@ -37,13 +37,13 @@ internal class SourceFile
         if (exceptionList.Any())
             throw new Exception();
 
-        var bla = Parse(nodes).ToArray();
+        var nodes = Parse(nodeRows).ToArray();
 
         // Parse Software Systems
-        Persons = bla.OfType<Person>().ToArray();
-        SoftwareSystems = bla.OfType<SoftwareSystem>().ToArray();
-        Containers = bla.OfType<Container>().ToArray();
-        Components = bla.OfType<Component>().ToArray();
+        Persons = nodes.OfType<Person>().ToArray();
+        SoftwareSystems = nodes.OfType<SoftwareSystem>().ToArray();
+        Containers = nodes.OfType<Container>().ToArray();
+        Components = nodes.OfType<Component>().ToArray();
     }
 
     public string Title { get; init; }
