@@ -38,12 +38,12 @@ internal class SourceFile
         if (exceptionList.Any())
             throw new Exception();
 
-        var nodes = Parse(nodeRows).ToArray();
+        var nodes = ParseNodes(nodeRows);
 
-        Persons = nodes.OfType<Person>().ToArray();
-        SoftwareSystems = nodes.OfType<SoftwareSystem>().ToArray();
-        Containers = nodes.OfType<Container>().ToArray();
-        Components = nodes.OfType<Component>().ToArray();
+        Persons = nodes.Values.OfType<Person>().ToArray();
+        SoftwareSystems = nodes.Values.OfType<SoftwareSystem>().ToArray();
+        Containers = nodes.Values.OfType<Container>().ToArray();
+        Components = nodes.Values.OfType<Component>().ToArray();
 
 
         // Parse Edges Tab
@@ -58,6 +58,8 @@ internal class SourceFile
 
         if (exceptionList.Any())
             throw new Exception();
+
+        var edges = ParseEdges(nodes, edgeRows);
     }
 
     public string Title { get; init; }
@@ -74,7 +76,7 @@ internal class SourceFile
     /// <param name="nodeRows"></param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
-    private IEnumerable<Node> Parse(IEnumerable<NodeRow> nodeRows)
+    private IDictionary<string, Node> ParseNodes(IEnumerable<NodeRow> nodeRows)
     {
         // Checks:
         // 1. Use Dictionary to avoid duplicate keys
@@ -150,7 +152,22 @@ internal class SourceFile
                 nodes.Add(n.Key, n);
         }
 
-        return nodes.Values;
+        return nodes;
+    }
+
+    private IEnumerable<Edge> ParseEdges(IDictionary<string, Node> nodes, IEnumerable<EdgeRow> edgeRows)
+    {
+        var edges = new List<Edge>();
+
+        foreach (var row in edgeRows)
+        {
+            var fromNode = nodes[row.From];
+            var toNode = nodes[row.To];
+
+            edges.Add(new Edge(fromNode, toNode));
+        }
+
+        return edges;
     }
 
     private class GeneralRow
@@ -304,5 +321,17 @@ internal class Component : Node
     }
 
     public string Technology { get; init; }
+}
+
+internal class Edge
+{
+    public Edge(Node from, Node to)
+    {
+        this.from = from;
+        this.to = to;
+    }
+
+    private readonly Node from;
+    private readonly Node to;
 }
 
