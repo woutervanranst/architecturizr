@@ -33,6 +33,7 @@ internal class SourceFile
                 .OutputExceptionsTo(exceptionList)
                 //.UsingHeaderNames(false) //map using column numbers, not names
                 .StartingFromRow(2) //data as of row 3
+                .Property(x => x.Row).MapsToRowNumber()
             ).ToArray();
 
         if (exceptionList.Any())
@@ -59,15 +60,14 @@ internal class SourceFile
 
         foreach (var row in nodeRows)
         {
-            if (row.IsValidPersonRow)
+            if (row.IsPersonRow)
             {
                 // Person
                 var p = new Person(row.PersonKey);
 
                 nodes.Add(p.Key, p);
-                yield return p;
             }
-            else if (row.IsValidSoftwareSystemRow)
+            else if (row.IsSoftwareSystemRow)
             {
                 // Software System
                 var ss = new SoftwareSystem(row.SoftwareSystemKey)
@@ -76,12 +76,10 @@ internal class SourceFile
                 };
 
                 nodes.Add(ss.Key, ss);
-                yield return ss;
-                
             }
-            else if (row.IsValidContainerRow)
+            else if (row.IsContainerRow)
             {
-                //Container
+                // Container
                 var parent = (SoftwareSystem)nodes[row.SoftwareSystemKey];
                 var c = new Container(parent, row.ContainerKey)
                 {
@@ -90,13 +88,26 @@ internal class SourceFile
                 };
 
                 nodes.Add(c.Key, c);
-                yield return c;
             }
+            else if (row.IsComponentRow)
+            {
+                // Component
+                var parent = (Container)nodes[row.ContainerKey];
+                var c = new Component(parent, row.ComponentKey)
+                {
+                    Description = row.Description,
+                    Technology = row.Technology
+                };
 
-
-
-            // Compontent
+                nodes.Add(c.Key, c);
+            }
+            else
+            {
+                throw new InvalidOperationException($"Row #{row.Row} did not match any Node type");
+            }
         }
+
+        return nodes.Values;
     }
 
 
@@ -129,6 +140,7 @@ internal class SourceFile
 
     private class NodeRow
     {
+        public int Row { get; init; }
         public string PersonKey { get; init; }
         public string SoftwareSystemKey { get; init; }
         public string ContainerKey { get; init; }
@@ -138,45 +150,69 @@ internal class SourceFile
         public string Deprecated { get; init; }
         public string Description { get; init; }
 
-        internal bool IsValidPersonRow =>
+        internal bool IsPersonRow =>
             !string.IsNullOrWhiteSpace(PersonKey) &&
             string.IsNullOrWhiteSpace(SoftwareSystemKey) &&
             string.IsNullOrWhiteSpace(ContainerKey) &&
-            string.IsNullOrWhiteSpace(ComponentKey) &&
-            string.IsNullOrWhiteSpace(Technology) &&
-            string.IsNullOrWhiteSpace(Owner) &&
-            string.IsNullOrWhiteSpace(Deprecated) &&
-            string.IsNullOrWhiteSpace(Description);
+            string.IsNullOrWhiteSpace(ComponentKey);
 
-        internal bool IsValidSoftwareSystemRow =>
+        internal bool IsSoftwareSystemRow =>
             string.IsNullOrWhiteSpace(PersonKey) &&
             !string.IsNullOrWhiteSpace(SoftwareSystemKey) &&
             string.IsNullOrWhiteSpace(ContainerKey) &&
-            string.IsNullOrWhiteSpace(ComponentKey) &&
-            string.IsNullOrWhiteSpace(Technology) &&
-            string.IsNullOrWhiteSpace(Owner) &&
-            string.IsNullOrWhiteSpace(Deprecated) &&
-            !string.IsNullOrWhiteSpace(Description);
+            string.IsNullOrWhiteSpace(ComponentKey);
 
-        internal bool IsValidContainerRow =>
+        internal bool IsContainerRow =>
             string.IsNullOrWhiteSpace(PersonKey) &&
             !string.IsNullOrWhiteSpace(SoftwareSystemKey) &&
             !string.IsNullOrWhiteSpace(ContainerKey) &&
-            string.IsNullOrWhiteSpace(ComponentKey) &&
-            !string.IsNullOrWhiteSpace(Technology) &&
-            string.IsNullOrWhiteSpace(Owner) &&
-            string.IsNullOrWhiteSpace(Deprecated) &&
-            !string.IsNullOrWhiteSpace(Description);
+            string.IsNullOrWhiteSpace(ComponentKey);
 
-        internal bool IsValidComponentRow =>
+        internal bool IsComponentRow =>
             string.IsNullOrWhiteSpace(PersonKey) &&
             !string.IsNullOrWhiteSpace(SoftwareSystemKey) &&
             !string.IsNullOrWhiteSpace(ContainerKey) &&
-            !string.IsNullOrWhiteSpace(ComponentKey) &&
-            !string.IsNullOrWhiteSpace(Technology) &&
-            string.IsNullOrWhiteSpace(Owner) &&
-            string.IsNullOrWhiteSpace(Deprecated) &&
-            !string.IsNullOrWhiteSpace(Description);
+            !string.IsNullOrWhiteSpace(ComponentKey);
+
+        //internal bool IsValidPersonRow =>
+        //    !string.IsNullOrWhiteSpace(PersonKey) &&
+        //    string.IsNullOrWhiteSpace(SoftwareSystemKey) &&
+        //    string.IsNullOrWhiteSpace(ContainerKey) &&
+        //    string.IsNullOrWhiteSpace(ComponentKey) &&
+        //    string.IsNullOrWhiteSpace(Technology) &&
+        //    string.IsNullOrWhiteSpace(Owner) &&
+        //    string.IsNullOrWhiteSpace(Deprecated) &&
+        //    string.IsNullOrWhiteSpace(Description);
+
+        //internal bool IsValidSoftwareSystemRow =>
+        //    string.IsNullOrWhiteSpace(PersonKey) &&
+        //    !string.IsNullOrWhiteSpace(SoftwareSystemKey) &&
+        //    string.IsNullOrWhiteSpace(ContainerKey) &&
+        //    string.IsNullOrWhiteSpace(ComponentKey) &&
+        //    string.IsNullOrWhiteSpace(Technology) &&
+        //    string.IsNullOrWhiteSpace(Owner) &&
+        //    string.IsNullOrWhiteSpace(Deprecated) &&
+        //    string.IsNullOrWhiteSpace(Description);
+
+        //internal bool IsValidContainerRow =>
+        //    string.IsNullOrWhiteSpace(PersonKey) &&
+        //    !string.IsNullOrWhiteSpace(SoftwareSystemKey) &&
+        //    !string.IsNullOrWhiteSpace(ContainerKey) &&
+        //    string.IsNullOrWhiteSpace(ComponentKey) &&
+        //    string.IsNullOrWhiteSpace(Technology) &&
+        //    string.IsNullOrWhiteSpace(Owner) &&
+        //    string.IsNullOrWhiteSpace(Deprecated) &&
+        //    string.IsNullOrWhiteSpace(Description);
+
+        //internal bool IsValidComponentRow =>
+        //    string.IsNullOrWhiteSpace(PersonKey) &&
+        //    !string.IsNullOrWhiteSpace(SoftwareSystemKey) &&
+        //    !string.IsNullOrWhiteSpace(ContainerKey) &&
+        //    !string.IsNullOrWhiteSpace(ComponentKey) &&
+        //    string.IsNullOrWhiteSpace(Technology) &&
+        //    string.IsNullOrWhiteSpace(Owner) &&
+        //    string.IsNullOrWhiteSpace(Deprecated) &&
+        //    string.IsNullOrWhiteSpace(Description);
     }
 
 
