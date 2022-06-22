@@ -31,8 +31,6 @@ internal class SourceFile
             x => x
                 .UsingSheet("Nodes")
                 .OutputExceptionsTo(exceptionList)
-                //.UsingHeaderNames(false) //map using column numbers, not names
-                .StartingFromRow(2) //data as of row 3
                 .Property(x => x.Row).MapsToRowNumber()
             ).ToArray();
 
@@ -41,18 +39,19 @@ internal class SourceFile
 
         var bla = Parse(nodes).ToArray();
 
-        // Parse Persons
-
         // Parse Software Systems
-        // SoftwareSystems = ParseSoftwareSystems(nodes).ToArray();
+        Persons = bla.OfType<Person>().ToArray();
         SoftwareSystems = bla.OfType<SoftwareSystem>().ToArray();
-
-
+        Containers = bla.OfType<Container>().ToArray();
+        Components = bla.OfType<Component>().ToArray();
     }
 
     public string Title { get; init; }
 
+    public IEnumerable<Person> Persons { get; init; }
     public IEnumerable<SoftwareSystem> SoftwareSystems { get; init; }
+    public IEnumerable<Container> Containers { get; init; }
+    public IEnumerable<Component> Components { get; init; }
 
     /// <summary>
     /// Parse every row in the source to exactly one node type
@@ -98,7 +97,10 @@ internal class SourceFile
                     throw new InvalidOperationException($"Row #{row.Row} matches multiple types");
 
                 // Container
-                var parent = (SoftwareSystem)nodes[row.SoftwareSystemKey];
+                var parent = nodes.ContainsKey(row.SoftwareSystemKey) ?
+                    (SoftwareSystem)nodes[row.SoftwareSystemKey] :
+                    throw new InvalidOperationException($"Parent '{row.SoftwareSystemKey}' of row #{row.Row} is not defined.");
+
                 n = new Container(parent, row.ContainerKey)
                 {
                     Name = row.Name,
@@ -112,7 +114,10 @@ internal class SourceFile
                     throw new InvalidOperationException($"Row #{row.Row} matches multiple types");
 
                 // Component
-                var parent = (Container)nodes[row.ContainerKey];
+                var parent = nodes.ContainsKey(row.ContainerKey) ?
+                    (Container)nodes[row.ContainerKey] :
+                    throw new InvalidOperationException($"Parent '{row.ContainerKey}' of row #{row.Row} is not defined.");
+
                 n = new Component(parent, row.ComponentKey)
                 {
                     Name = row.Name,
@@ -131,28 +136,6 @@ internal class SourceFile
 
         return nodes.Values;
     }
-
-
-    //private IEnumerable<SoftwareSystemNode> ParseSoftwareSystems(IEnumerable<NodeRow> nodes)
-    //{
-    //    var sss = nodes
-    //        .Where(n => !string.IsNullOrWhiteSpace(n.SoftwareSystemKey))
-    //        .Select(n => n.SoftwareSystemKey).Distinct();
-
-    //    foreach (var ss in sss)
-    //    {
-    //        var r = nodes.Where(n => n.SoftwareSystemKey == ss && !string.IsNullOrWhiteSpace(n.Description)).ToArray();
-
-    //        if (r.Length == 0)
-    //            throw new InvalidOperationException($"SoftwareSystem '{ss}' is not properly defined. Does not contain a Description");
-    //        else if (r.Length > 1)
-    //            throw new InvalidOperationException($"SoftwareSystem '{ss}' is not properly defined. Contains more than one Description.");
-
-    //        yield return new SoftwareSystemNode(r.Single());
-    //    }
-    //}
-
-    
 
     private class GeneralRow
     {
@@ -242,10 +225,6 @@ internal class SourceFile
         //    string.IsNullOrWhiteSpace(Deprecated) &&
         //    string.IsNullOrWhiteSpace(Description);
     }
-
-
-
-
 }
 
 internal class Node
