@@ -54,57 +54,73 @@ internal class SourceFile
 
     public IEnumerable<SoftwareSystem> SoftwareSystems { get; init; }
 
+    /// <summary>
+    /// Parse every row in the source to exactly one node type
+    /// </summary>
+    /// <param name="nodeRows"></param>
+    /// <returns></returns>
+    /// <exception cref="InvalidOperationException"></exception>
     private IEnumerable<Node> Parse(IEnumerable<NodeRow> nodeRows)
     {
+        // Checks:
+        // 1. Use Dictionary to avoid duplicate keys
+        // 2. Use null checks in the row type matcher to avoid matches to multiple row types
+
         var nodes = new Dictionary<string, Node>();
 
         foreach (var row in nodeRows)
         {
+            Node? n = null;
+
             if (row.IsPersonRow)
             {
                 // Person
-                var p = new Person(row.PersonKey);
-
-                nodes.Add(p.Key, p);
+                n = new Person(row.PersonKey);
             }
-            else if (row.IsSoftwareSystemRow)
+            if (row.IsSoftwareSystemRow)
             {
+                if (n != null)
+                    throw new InvalidOperationException($"Row #{row.Row} matches multiple types");
+
                 // Software System
-                var ss = new SoftwareSystem(row.SoftwareSystemKey)
+                n = new SoftwareSystem(row.SoftwareSystemKey)
                 {
                     Description = row.Description
                 };
-
-                nodes.Add(ss.Key, ss);
             }
-            else if (row.IsContainerRow)
+            if (row.IsContainerRow)
             {
+                if (n != null)
+                    throw new InvalidOperationException($"Row #{row.Row} matches multiple types");
+
                 // Container
                 var parent = (SoftwareSystem)nodes[row.SoftwareSystemKey];
-                var c = new Container(parent, row.ContainerKey)
+                n = new Container(parent, row.ContainerKey)
                 {
                     Description = row.Description,
                     Technology = row.Technology
                 };
-
-                nodes.Add(c.Key, c);
             }
-            else if (row.IsComponentRow)
+            if (row.IsComponentRow)
             {
+                if (n != null)
+                    throw new InvalidOperationException($"Row #{row.Row} matches multiple types");
+
                 // Component
                 var parent = (Container)nodes[row.ContainerKey];
-                var c = new Component(parent, row.ComponentKey)
+                n = new Component(parent, row.ComponentKey)
                 {
                     Description = row.Description,
                     Technology = row.Technology
                 };
+            }
 
-                nodes.Add(c.Key, c);
-            }
-            else
-            {
+            if (n == null)
                 throw new InvalidOperationException($"Row #{row.Row} did not match any Node type");
-            }
+            else if (nodes.ContainsKey(n.Key))
+                throw new InvalidOperationException($"Duplicate key '{n.Key}' in row #{row.Row}");
+            else
+                nodes.Add(n.Key, n);
         }
 
         return nodes.Values;
@@ -228,6 +244,8 @@ internal class Node
     }
 
     public string Key { get; init; }
+
+    public override string ToString() => $"{this.GetType().Name}-{Key}";
 }
 
 internal class Person : Node
@@ -242,23 +260,29 @@ internal class SoftwareSystem : Node
     }
 
     public string Description { get; init; }
+
+    public List<Container> Children { get; } = new List<Container>();
 }
 
 internal class Container : Node
 {
     public Container(SoftwareSystem parent, string key) : base(key)
     {
+        parent.Children.Add(this);
     }
 
     public string Technology { get; init; }
 
     public string Description { get; init; }
+
+    public List<Component> Children { get; } = new List<Component>();
 }
 
 internal class Component : Node
 {
     public Component(Container parent, string key) : base(key)
     {
+        parent.Children.Add(this);
     }
 
     public string Technology { get; init; }
