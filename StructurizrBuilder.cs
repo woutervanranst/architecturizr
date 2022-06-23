@@ -10,29 +10,39 @@ namespace architecturizr
             var model = workspace.Model;
             
 
-            foreach (var p in s.Nodes.OfType<Person>())
-                p.StructurizrObject = model.AddPerson(p.Name, p.Description);
+            foreach (var person in s.Nodes.OfType<Person>())
+                person.StructurizrObject = model.AddPerson(person.Name, person.Description);
 
-            foreach (var ss in s.Nodes.OfType<SoftwareSystem>())
+            foreach (var softwareSystem in s.Nodes.OfType<SoftwareSystem>())
             {
-                ss.StructurizrObject = model.AddSoftwareSystem(ss.Name, ss.Description);
+                softwareSystem.StructurizrObject = model.AddSoftwareSystem(softwareSystem.Name, softwareSystem.Description);
 
-                foreach (var cont in ss.Children)
+                foreach (var container in softwareSystem.Children)
                 {
-                    cont.StructurizrObject = ss.StructurizrObject.AddContainer(cont.Name, cont.Description, cont.Technology);
+                    container.StructurizrObject = softwareSystem.StructurizrObject.AddContainer(container.Name, container.Description, container.Technology);
 
-                    foreach (var comp in cont.Children)
+                    foreach (var component in container.Children)
                     {
-                        comp.StructurizrObject = cont.StructurizrObject.AddComponent(comp.Name, comp.Description, comp.Technology);
+                        var c = container.StructurizrObject.AddComponent(component.Name, component.Description, component.Technology);
+
+                        c.AddTags(c.Technology);
+                        if (!string.IsNullOrWhiteSpace(component.Owner))
+                            c.AddTags("IVS");
+
+                        component.StructurizrObject = c;
                     }
                 }
             }
 
+            //foreach (var n in s.Nodes)
+            //{
+            //    Structurizr.StaticStructureElement e = ((dynamic)s.Nodes).StructurizrObject;
+            //    n.te
+
+            //}
+
             foreach (var edge in s.Edges)
             {
-                //if (edge.To.StructurizrObject is Structurizr.Container)
-                //    edge.From.StructurizrObject.Uses((Structurizr.Container)edge.To.StructurizrObject, "hheh");
-
                 ((dynamic)edge).From.StructurizrObject.Uses(((dynamic)edge.To).StructurizrObject, "Uses2");
             }
 
@@ -75,9 +85,15 @@ namespace architecturizr
             styles.Add(new Structurizr.ElementStyle(Structurizr.Tags.Container) { Background = "#1168bd", Color = "#ffffff" });
             styles.Add(new Structurizr.ElementStyle(Structurizr.Tags.Person) { Background = "#08427b", Color = "#ffffff", Shape = Structurizr.Shape.Person });
 
+            styles.Add(new Structurizr.ElementStyle(Tags.Python) { Icon = Icons.pythonPng });
+            styles.Add(new Structurizr.ElementStyle(Tags.Scala) { Icon = Icons.scalaPng });
+
+            styles.Add(new Structurizr.ElementStyle("IVS") { Background = "#e7285d" });
+
             var structurizrClient = new StructurizrClient(apiKey, apiSecret);
             structurizrClient.PutWorkspace(workspaceId, workspace);
         }
+
+        
     }
 }
-

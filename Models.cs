@@ -13,6 +13,8 @@ internal abstract class Node
 
     public string Description { get; init; }
 
+    public string Owner { get; init; }
+
     // public virtual Structurizr.StaticStructureElement StructurizrObject { get; set; }
 
     public override string ToString() => $"{this.GetType().Name}-{Key}";
@@ -77,5 +79,13 @@ internal class Edge
     }
 
     public Node From { get; }
-    public Node To { get; } //todo remove init from all others
+    public Node To { get; }
+}
+
+
+public sealed class Tags
+{
+    public const string Scala = "Scala";
+
+    public const string Python = "Python";
 }

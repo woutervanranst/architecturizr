@@ -111,7 +111,8 @@ internal class SourceFile
                 n = new SoftwareSystem(row.SoftwareSystemKey)
                 {
                     Name = row.Name,
-                    Description = row.Description
+                    Description = row.Description,
+                    Owner = row.Owner
                 };
             }
             if (row.IsContainerRow)
@@ -128,7 +129,8 @@ internal class SourceFile
                 {
                     Name = row.Name,
                     Description = row.Description,
-                    Technology = row.Technology
+                    Technology = row.Technology,
+                    Owner = row.Owner
                 };
             }
             if (row.IsComponentRow)
@@ -145,7 +147,8 @@ internal class SourceFile
                 {
                     Name = row.Name,
                     Description = row.Description,
-                    Technology = row.Technology
+                    Technology = row.Technology,
+                    Owner = row.Owner
                 };
             }
 
