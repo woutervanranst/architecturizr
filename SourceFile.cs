@@ -39,11 +39,12 @@ internal class SourceFile
             throw new Exception();
 
         var nodes = ParseNodes(nodeRows);
+        Nodes = nodes.Values;
 
-        Persons = nodes.Values.OfType<Person>().ToArray();
-        SoftwareSystems = nodes.Values.OfType<SoftwareSystem>().ToArray();
-        Containers = nodes.Values.OfType<Container>().ToArray();
-        Components = nodes.Values.OfType<Component>().ToArray();
+        //Persons = nodes.Values.OfType<Person>().ToArray();
+        //SoftwareSystems = nodes.Values.OfType<SoftwareSystem>().ToArray();
+        //Containers = nodes.Values.OfType<Container>().ToArray();
+        //Components = nodes.Values.OfType<Component>().ToArray();
 
 
         // Parse Edges Tab
@@ -59,16 +60,20 @@ internal class SourceFile
         if (exceptionList.Any())
             throw new Exception();
 
-        var edges = ParseEdges(nodes, edgeRows);
+        Edges = ParseEdges(nodes, edgeRows);
     }
 
     public string Title { get; init; }
     public string Description { get; init; }
 
-    public IEnumerable<Person> Persons { get; init; }
-    public IEnumerable<SoftwareSystem> SoftwareSystems { get; init; }
-    public IEnumerable<Container> Containers { get; init; }
-    public IEnumerable<Component> Components { get; init; }
+    public IEnumerable<Node> Nodes { get; init; }
+
+    // public IEnumerable<Person> Persons { get; init; }
+    // public IEnumerable<SoftwareSystem> SoftwareSystems { get; init; }
+    // public IEnumerable<Container> Containers { get; init; }
+    // public IEnumerable<Component> Components { get; init; }
+
+    public IEnumerable<Edge> Edges { get; init; }
 
     /// <summary>
     /// Parse every row in the source to exactly one node type
@@ -271,67 +276,5 @@ internal class SourceFile
     }
 }
 
-internal class Node
-{
-    protected Node(string key)
-    {
-        this.Key = key;
-    }
 
-    public string Key { get; init; }
-
-    public string Name { get; init; }
-
-    public string Description { get; init; }
-
-    public override string ToString() => $"{this.GetType().Name}-{Key}";
-}
-
-internal class Person : Node
-{
-    public Person(string key) : base(key) { }
-}
-
-internal class SoftwareSystem : Node
-{
-    public SoftwareSystem(string key) : base(key)
-    {
-    }
-
-    public List<Container> Children { get; } = new List<Container>();
-}
-
-internal class Container : Node
-{
-    public Container(SoftwareSystem parent, string key) : base(key)
-    {
-        parent.Children.Add(this);
-    }
-
-    public string Technology { get; init; }
-
-    public List<Component> Children { get; } = new List<Component>();
-}
-
-internal class Component : Node
-{
-    public Component(Container parent, string key) : base(key)
-    {
-        parent.Children.Add(this);
-    }
-
-    public string Technology { get; init; }
-}
-
-internal class Edge
-{
-    public Edge(Node from, Node to)
-    {
-        this.from = from;
-        this.to = to;
-    }
-
-    private readonly Node from;
-    private readonly Node to;
-}
 

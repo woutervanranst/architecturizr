@@ -20,4 +20,4 @@ long workspaceId = 74785;
 var apiKey = config["structurizr:apiKey"]; // see https://structurizr.com/workspace/74785/settings
 var apiSecret = config["structurizr:apiSecret"];
 
-// var b = new StructurizrBuilder(s, workspaceId, apiKey, apiSecret);
+var b = new StructurizrBuilder(s, workspaceId, apiKey, apiSecret);

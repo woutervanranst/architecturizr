@@ -13,24 +13,17 @@ internal abstract class Node
 
     public string Description { get; init; }
 
+    public Structurizr.StaticStructureElement StructurizrObject { get; set; }
+
     public override string ToString() => $"{this.GetType().Name}-{Key}";
 }
 
-internal abstract class Node<T> : Node where T : Structurizr.StaticStructureElement
-{
-    protected Node(string key) : base(key)
-    {
-    }
-
-    public T StructurizrObject { get; set; }
-}
-
-internal class Person : Node<Structurizr.Person>
+internal class Person : Node
 {
     public Person(string key) : base(key) { }
 }
 
-internal class SoftwareSystem : Node<Structurizr.SoftwareSystem>
+internal class SoftwareSystem : Node
 {
     public SoftwareSystem(string key) : base(key)
     {
@@ -39,7 +32,7 @@ internal class SoftwareSystem : Node<Structurizr.SoftwareSystem>
     public List<Container> Children { get; } = new List<Container>();
 }
 
-internal class Container : Node<Structurizr.Container>
+internal class Container : Node
 {
     public Container(SoftwareSystem parent, string key) : base(key)
     {
@@ -51,7 +44,7 @@ internal class Container : Node<Structurizr.Container>
     public List<Component> Children { get; } = new List<Component>();
 }
 
-internal class Component : Node<Structurizr.Component>
+internal class Component : Node
 {
     public Component(Container parent, string key) : base(key)
     {
