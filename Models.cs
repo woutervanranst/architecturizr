@@ -36,10 +36,13 @@ internal class Container : Node
 {
     public Container(SoftwareSystem parent, string key) : base(key)
     {
+        Parent = parent;
         parent.Children.Add(this);
     }
 
     public string Technology { get; init; }
+
+    public SoftwareSystem Parent { get; }
 
     public List<Component> Children { get; } = new List<Component>();
 }
@@ -48,8 +51,11 @@ internal class Component : Node
 {
     public Component(Container parent, string key) : base(key)
     {
+        Parent = parent;
         parent.Children.Add(this);
     }
+
+    public Container Parent { get; }
 
     public string Technology { get; init; }
 }
