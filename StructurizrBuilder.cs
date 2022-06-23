@@ -44,16 +44,27 @@ namespace architecturizr
 
             foreach (var ss in s.Nodes.OfType<SoftwareSystem>())
             {
-                var contextView = viewSet.CreateSystemContextView((Structurizr.SoftwareSystem)ss.StructurizrObject, ss.Key, "hahaha");
+                var v = viewSet.CreateSystemContextView((Structurizr.SoftwareSystem)ss.StructurizrObject, ss.Key, "hahaha");
 
-                contextView.AddAllElements();
-                contextView.EnableAutomaticLayout();
+                v.AddAllElements();
+                v.EnableAutomaticLayout();
             }
 
-            // foreach (var c in s.Nodes.OfType<Container>())
-            // {
-            //     var containerView = viewSet.CreateContainerView(c.pa ((Structurizr.SoftwareSystem)c.StructurizrObject).Parent, c.Key, "haha");
-            //}
+            foreach (var ss in s.Nodes.OfType<SoftwareSystem>())
+            {
+                var v = viewSet.CreateContainerView((Structurizr.SoftwareSystem)ss.StructurizrObject, "c" + ss.Key, "hahaha");
+
+                v.AddAllElements();
+                v.EnableAutomaticLayout();
+            }
+
+            foreach (var c in s.Nodes.OfType<Container>())
+            {
+                var v = viewSet.CreateComponentView((Structurizr.Container)c.StructurizrObject, c.Key, "hehfdhjdfd");
+
+                v.AddAllElements();
+                v.EnableAutomaticLayout();
+            }
 
             // https://github.com/structurizr/dotnet-core-quickstart/blob/master/structurizr/Program.cs
 
@@ -63,8 +74,6 @@ namespace architecturizr
             styles.Add(new Structurizr.ElementStyle(Structurizr.Tags.SoftwareSystem) { Background = "#1168bd", Color = "#ffffff" });
             styles.Add(new Structurizr.ElementStyle(Structurizr.Tags.Container) { Background = "#1168bd", Color = "#ffffff" });
             styles.Add(new Structurizr.ElementStyle(Structurizr.Tags.Person) { Background = "#08427b", Color = "#ffffff", Shape = Structurizr.Shape.Person });
-
-
 
             var structurizrClient = new StructurizrClient(apiKey, apiSecret);
             structurizrClient.PutWorkspace(workspaceId, workspace);
