@@ -28,22 +28,14 @@ namespace architecturizr
                 }
             }
 
-            //var cbd = (Structurizr.Person)s.Nodes.Single(n => n.Key == "cbd").StructurizrObject;
-            //var robo = (Structurizr.Container)s.Nodes.Single(n => n.Key == "robo").StructurizrObject;
-            //cbd.Uses(robo, "Uses");
-
             foreach (var edge in s.Edges)
             {
                 //if (edge.To.StructurizrObject is Structurizr.Container)
                 //    edge.From.StructurizrObject.Uses((Structurizr.Container)edge.To.StructurizrObject, "hheh");
 
-                ((dynamic)edge.From.StructurizrObject).Uses((dynamic)edge.To.StructurizrObject, "Uses");
+                edge.From.StructurizrObject.Uses((dynamic)edge.To.StructurizrObject, "Uses2");
             }
 
-
-            //var user = model.AddPerson("User", "A user of my software system.");
-            //var softwareSystem = model.AddSoftwareSystem("Software System", "My software system.");
-            // p.Uses(softwareSystem, "Uses");
 
             model.AddImplicitRelationships(); // ! IMPORTANT, see https://github.com/structurizr/dotnet/issues/97
 
@@ -54,29 +46,14 @@ namespace architecturizr
             {
                 var contextView = viewSet.CreateSystemContextView((Structurizr.SoftwareSystem)ss.StructurizrObject, ss.Key, "hahaha");
 
-                // contextView.AddAllSoftwareSystems();
                 contextView.AddAllElements();
-                // contextView.AddAllPeople();
                 contextView.EnableAutomaticLayout();
-                // contextView.AddAllElements();
-
             }
 
             // foreach (var c in s.Nodes.OfType<Container>())
             // {
             //     var containerView = viewSet.CreateContainerView(c.pa ((Structurizr.SoftwareSystem)c.StructurizrObject).Parent, c.Key, "haha");
             //}
-
-            //    var fe = (Structurizr.SoftwareSystem)s.Nodes.Single(n => n.Key == "fe").StructurizrObject;
-
-            //var contextView = viewSet.CreateSystemContextView(fe, "hh", "aaaa");
-            //contextView.AddAllElements();
-            //contextView.EnableAutomaticLayout();
-
-            //var containerView = viewSet.CreateContainerView(fe, "ha", "bla");
-            //containerView.AddAllElements();
-            //containerView.EnableAutomaticLayout();
-
 
             // https://github.com/structurizr/dotnet-core-quickstart/blob/master/structurizr/Program.cs
 
