@@ -13,7 +13,7 @@ internal abstract class Node
 
     public string Description { get; init; }
 
-    public Structurizr.StaticStructureElement StructurizrObject { get; set; }
+    // public virtual Structurizr.StaticStructureElement StructurizrObject { get; set; }
 
     public override string ToString() => $"{this.GetType().Name}-{Key}";
 }
@@ -21,6 +21,8 @@ internal abstract class Node
 internal class Person : Node
 {
     public Person(string key) : base(key) { }
+
+    public Structurizr.Person StructurizrObject { get; set; }
 }
 
 internal class SoftwareSystem : Node
@@ -30,6 +32,8 @@ internal class SoftwareSystem : Node
     }
 
     public List<Container> Children { get; } = new List<Container>();
+
+    public Structurizr.SoftwareSystem StructurizrObject { get; set; }
 }
 
 internal class Container : Node
@@ -45,6 +49,8 @@ internal class Container : Node
     public SoftwareSystem Parent { get; }
 
     public List<Component> Children { get; } = new List<Component>();
+
+    public Structurizr.Container StructurizrObject { get; set; }
 }
 
 internal class Component : Node
@@ -58,6 +64,8 @@ internal class Component : Node
     public Container Parent { get; }
 
     public string Technology { get; init; }
+
+    public Structurizr.Component StructurizrObject { get; set; }
 }
 
 internal class Edge
