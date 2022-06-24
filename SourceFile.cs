@@ -32,6 +32,9 @@ internal class SourceFile
             x => x
                 .UsingSheet("Nodes")
                 .OutputExceptionsTo(exceptionList)
+
+                .IgnoreColumsWithoutMatchingProperties()
+
                 .Property(x => x.Row).MapsToRowNumber()
             ).ToArray();
 
@@ -169,6 +172,11 @@ internal class SourceFile
 
         foreach (var row in edgeRows)
         {
+            if (!nodes.ContainsKey(row.From))
+                throw new InvalidOperationException($"The 'From-node' {row.From} on row {row.Row} is not defined.");
+            if (!nodes.ContainsKey(row.To))
+                throw new InvalidOperationException($"The 'To-node' {row.To} on row {row.Row} is not defined.");
+
             var fromNode = nodes[row.From];
             var toNode = nodes[row.To];
 

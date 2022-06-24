@@ -56,25 +56,57 @@ namespace architecturizr
             {
                 var v = viewSet.CreateSystemContextView(ss.StructurizrObject, ss.Key, "hahaha");
 
+                v.Title = $"[(1) System Context] {ss.Name}";
                 v.AddAllElements();
-                v.EnableAutomaticLayout();
+                v.EnableAutomaticLayout(Structurizr.RankDirection.TopBottom, 200, 200, 200, false);
             }
 
             foreach (var ss in s.Nodes.OfType<SoftwareSystem>())
             {
                 var v = viewSet.CreateContainerView(ss.StructurizrObject, "c" + ss.Key, "hahaha");
 
+                v.Title = $"[(2) Container] {ss.Name}";
                 v.AddAllElements();
-                v.EnableAutomaticLayout();
+                v.EnableAutomaticLayout(Structurizr.RankDirection.TopBottom, 200, 200, 200, false);
+                // v.PaperSize = Structurizr.PaperSize.A0_Landscape;
             }
 
             foreach (var c in s.Nodes.OfType<Container>())
             {
+                if (c.Children.Count == 0) // if this Container does not have any children (Components), the diagram will not show anything useful
+                    continue;
+
                 var v = viewSet.CreateComponentView(c.StructurizrObject, c.Key, "hehfdhjdfd");
 
+                v.Title = $"[(3) Component 123] {c.Name}";
+                v.Description = $"What is inside {c.Name}";
+
                 v.AddAllElements();
+                // v.EnableAutomaticLayout( Structurizr.RankDirection.TopBottom, 200, 200, 200, false);
+                // v.PaperSize = Structurizr.PaperSize.A0_Landscape;
+            }
+
+            foreach (var c in s.Nodes.OfType<Component>())
+            {
+                var v = viewSet.CreateComponentView(c.Parent.StructurizrObject, "component-" + c.Key, "hahad");
+
+                v.Title = $"[(3) Component] {c.Name}";
+                v.Description = $"What interacts with {c.Name}";
+                v.Add(c.StructurizrObject);
+                v.AddNearestNeighbours(c.StructurizrObject);
+
                 v.EnableAutomaticLayout();
             }
+
+
+            /* Microservice
+             * 
+             *  https://structurizr.com/share/4241/diagrams#Containers
+             *  https://github.com/structurizr/dsl/tree/master/docs/cookbook/workspace-extension
+             *  https://structurizr.com/help/usage-recommendations
+             */
+
+            // Sequence Diagrams? https://github.com/structurizr/java/pull/129/files#diff-b55fd8523c23d8ff04163446b3ffc28e4f93238660847d4394926df9398f7a53
 
             // https://github.com/structurizr/dotnet-core-quickstart/blob/master/structurizr/Program.cs
 
