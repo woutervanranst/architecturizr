@@ -1,6 +1,7 @@
-﻿using ExcelToEnumerable;
+﻿using architecturizr.Models;
+using ExcelToEnumerable;
 
-namespace architecturizr;
+namespace architecturizr.InputParsers;
 
 /// <summary>
 /// Read the Excel Source file

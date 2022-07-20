@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Text.RegularExpressions;
+using architecturizr.Models;
 
-namespace architecturizr;
+namespace architecturizr.InputParsers;
 
-public class SequencediagramDotOrgProcessParser
+internal class SequencediagramDotOrgProcessParser
 {
     public SequencediagramDotOrgProcessParser()
     {
     }
 
-    public void Parse()
+    public Process Parse(FileInfo f)
     {
-        var lines = File.ReadAllLines(@"/Users/wouter/Documents/GitLab/solution-architecture/microservice-dependencies/structurizr-c4/processes/s1.txt")
+        var lines = File.ReadAllLines(f.FullName)
             .Where(l => !string.IsNullOrWhiteSpace(l)) // remove empty lines from the file
             .ToArray();
 
@@ -71,19 +72,13 @@ public class SequencediagramDotOrgProcessParser
                     From = from,
                     To = to,
                     Topic = topic,
-                    Description = description
+                    Description = description,
                 };
 
                 p.Steps.Add(s);
             }
-            
-
         }
-        
 
-
+        return p;
     }
 }
-
-
-

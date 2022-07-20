@@ -15,15 +15,19 @@
     <None Remove="FluentValidation" />
     <None Remove="Microsoft.Extensions.Configuration.UserSecrets" />
     <None Remove="InputParsers\" />
+    <None Remove="OutputParser\" />
+    <None Remove="Models\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="ExcelToEnumerable" Version="0.3.10" />
     <PackageReference Include="Structurizr.Core" Version="1.0.0" />
     <PackageReference Include="Structurizr.Client" Version="1.0.0" />
-    <PackageReference Include="FluentValidation" Version="11.0.3" />
+    <PackageReference Include="FluentValidation" Version="11.1.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.1" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="InputParsers\" />
+    <Folder Include="OutputParser\" />
+    <Folder Include="Models\" />
   </ItemGroup>
 </Project>
