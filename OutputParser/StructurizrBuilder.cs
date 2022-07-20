@@ -5,42 +5,23 @@ namespace architecturizr.OutputParser;
 
 internal class StructurizrBuilder
 {
-    public StructurizrBuilder(string title, string description, IEnumerable<Node> nodes, long workspaceId, string apiKey, string apiSecret)
+    public StructurizrBuilder(string title, string description, IEnumerable<Node> nodes, IEnumerable<Process> processes, long workspaceId, string apiKey, string apiSecret)
     {
+        // Configure Workspace
         var workspace = new Structurizr.Workspace(title, description);
         var model = workspace.Model;
 
+        // Add Nodes
+        nodes = GetNodesInUse(processes).Distinct().ToArray();
+        AddNodes(nodes, model);
 
-        foreach (var person in nodes.OfType<Person>())
-            person.StructurizrObject = model.AddPerson(person.Name, person.Description);
 
-        foreach (var softwareSystem in nodes.OfType<SoftwareSystem>())
-        {
-            softwareSystem.StructurizrObject = model.AddSoftwareSystem(softwareSystem.Name, softwareSystem.Description);
 
-            foreach (var container in softwareSystem.Children)
-            {
-                container.StructurizrObject = softwareSystem.StructurizrObject.AddContainer(container.Name, container.Description, container.Technology);
 
-                foreach (var component in container.Children)
-                {
-                    var c = container.StructurizrObject.AddComponent(component.Name, component.Description, component.Technology);
 
-                    c.AddTags(c.Technology);
-                    if (!string.IsNullOrWhiteSpace(component.Owner))
-                        c.AddTags("IVS");
 
-                    component.StructurizrObject = c;
-                }
-            }
-        }
+        // Add Edges
 
-        //foreach (var n in s.Nodes)
-        //{
-        //    Structurizr.StaticStructureElement e = ((dynamic)s.Nodes).StructurizrObject;
-        //    n.te
-
-        //}
 
         //foreach (var edge in s.Edges)
         //{
@@ -128,5 +109,78 @@ internal class StructurizrBuilder
         structurizrClient.PutWorkspace(workspaceId, workspace);
     }
 
+    
+
+    private static IEnumerable<Node> GetNodesInUse(IEnumerable<Process> ps)
+    {
+        foreach (var n in ps.SelectMany(p => p.Steps).SelectMany(s => new Node[] { s.From, s.To }))
+        {
+            // while ((n = s.From) != null)
+            //{
+            yield return n;
+
+            if (n is Person)
+            {
+                // No Parent
+            }
+            else if (n is SoftwareSystem)
+            {
+                // No Parent
+            }
+            else if (n is Container cont)
+            {
+                yield return cont.Parent;
+            }
+            else if (n is Component comp)
+            {
+                yield return comp.Parent;
+                yield return comp.Parent.Parent;
+            }
+        }
+    }
+
+    private static void AddNodes(IEnumerable<Node> nodes, Structurizr.Model model)
+    {
+        // Only the nodes in use
+        foreach (var person in nodes.OfType<Person>())
+            person.StructurizrObject = model.AddPerson(person.Name, person.Description);
+
+        foreach (var ss in nodes.OfType<SoftwareSystem>())
+            ss.StructurizrObject = model.AddSoftwareSystem(ss.Name, ss.Description);
+
+        foreach (var cont in nodes.OfType<Container>())
+            cont.StructurizrObject = cont.Parent.StructurizrObject.AddContainer(cont.Name, cont.Description, cont.Technology);
+
+        foreach (var comp in nodes.OfType<Component>())
+        {
+            var c = comp.StructurizrObject = comp.Parent.StructurizrObject.AddComponent(comp.Name, comp.Description, comp.Technology);
+
+            c.AddTags(c.Technology);
+            if (!string.IsNullOrWhiteSpace(comp.Owner))
+                c.AddTags("IVS");
+        }
+
+        // THIS IS THE OLD CODE THAT ADDS ALL COMPONENTS REGARDLESS OF BEING USED
+        //foreach (var softwareSystem in nodes.OfType<SoftwareSystem>())
+        //{
+        //    softwareSystem.StructurizrObject = model.AddSoftwareSystem(softwareSystem.Name, softwareSystem.Description);
+
+        //    foreach (var container in softwareSystem.Children)
+        //    {
+        //        container.StructurizrObject = softwareSystem.StructurizrObject.AddContainer(container.Name, container.Description, container.Technology);
+
+        //        foreach (var component in container.Children)
+        //        {
+        //            var c = container.StructurizrObject.AddComponent(component.Name, component.Description, component.Technology);
+
+        //            c.AddTags(c.Technology);
+        //            if (!string.IsNullOrWhiteSpace(component.Owner))
+        //                c.AddTags("IVS");
+
+        //            component.StructurizrObject = c;
+        //        }
+        //    }
+        //}
+    }
 
 }
