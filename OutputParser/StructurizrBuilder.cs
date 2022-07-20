@@ -1,4 +1,5 @@
 ﻿using architecturizr.Models;
+using architecturizr.Utils;
 using Structurizr.Api;
 
 namespace architecturizr.OutputParser;
@@ -11,7 +12,7 @@ internal class StructurizrBuilder
         var workspace = new Structurizr.Workspace(title, description);
         var model = workspace.Model;
 
-        model.ImpliedRelationshipsStrategy = new Structurizr.CreateImpliedRelationshipsUnlessAnyRelationshipExistsStrategy(); // ! IMPORTANT, see https://github.com/structurizr/dotnet/issues/97
+        model.ImpliedRelationshipsStrategy = new Structurizr.CreateImpliedRelationshipsUnlessSameRelationshipExistsStrategy(); //.CreateImpliedRelationshipsUnlessAnyRelationshipExistsStrategy(); // ! IMPORTANT, see https://github.com/structurizr/dotnet/issues/97
 
 
         // Add Nodes
@@ -49,7 +50,7 @@ internal class StructurizrBuilder
 
         foreach (var ss in nodes.OfType<SoftwareSystem>())
         {
-            var v = viewSet.CreateContainerView(ss.StructurizrObject, "c" + ss.Key, $"What is inside/interacts with '{ss.Name}'");
+            var v = viewSet.CreateContainerView(ss.StructurizrObject, "c" + ss.Key, $"Interactions with the insides of '{ss.Name}'");
             v.Title = $"[(2) Container] {ss.Name}";
 
             v.AddAllElements();
@@ -86,7 +87,7 @@ internal class StructurizrBuilder
         {
             //var c = ((SoftwareSystem)nodes.Where(n => n.Key == "ivs-be").Single()).StructurizrObject;
             var c = ((Container)nodes.Where(n => n.Key == "k8s").Single()).StructurizrObject;
-            var v = viewSet.CreateDynamicView(c, "process" + p.Name, p.Name);
+            var v = viewSet.CreateDynamicView(c, $"process-{p.Name.ToKebabCase()}", p.Name);
 
             foreach (var s in p.Steps)
             {
