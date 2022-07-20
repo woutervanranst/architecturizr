@@ -17,6 +17,7 @@
     <None Remove="InputParsers\" />
     <None Remove="OutputParser\" />
     <None Remove="Models\" />
+    <None Remove="Utils\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="ExcelToEnumerable" Version="0.3.10" />
@@ -29,5 +30,6 @@
     <Folder Include="InputParsers\" />
     <Folder Include="OutputParser\" />
     <Folder Include="Models\" />
+    <Folder Include="Utils\" />
   </ItemGroup>
 </Project>
