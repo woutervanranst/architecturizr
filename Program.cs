@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using architecturizr;
 using architecturizr.InputParsers;
+using architecturizr.Models;
 using architecturizr.OutputParser;
 using Microsoft.Extensions.Configuration;
 
@@ -18,7 +19,11 @@ var (title, description, nodes) = nodeParser.Parse(new FileInfo("/Users/wouter/D
 
 // Parse Processes
 var processParser = new SequencediagramDotOrgProcessParser(nodes);
-processParser.Parse(new FileInfo(@"/Users/wouter/Documents/GitLab/solution-architecture/microservice-dependencies/structurizr-c4/processes/s1.txt"));
+
+var processesDirectory = new DirectoryInfo(@"/Users/wouter/Documents/GitLab/solution-architecture/microservice-dependencies/structurizr-c4/processes/");
+var processes = processesDirectory.GetFiles().Select(fi => processParser.Parse(fi));
+
+// var processes = new Process[]{ processParser.Parse(new FileInfo(@" / Users/wouter/Documents/GitLab/solution-architecture/microservice-dependencies/structurizr-c4/processes/s1.txt")) };
 
 // Build Structurizr Diagram
 var config = new ConfigurationBuilder()
@@ -29,4 +34,4 @@ long workspaceId = 74785;
 var apiKey = config["structurizr:apiKey"]; // see https://structurizr.com/workspace/74785/settings
 var apiSecret = config["structurizr:apiSecret"];
 
-var b = new StructurizrBuilder(title, description, nodes.Values, workspaceId, apiKey, apiSecret);
+var b = new StructurizrBuilder(title, description, nodes.Values, processes, workspaceId, apiKey, apiSecret);
