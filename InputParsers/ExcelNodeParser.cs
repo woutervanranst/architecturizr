@@ -6,9 +6,9 @@ namespace architecturizr;
 /// Read the Excel Source file
 /// https://stackoverflow.com/a/15793495
 /// </summary>
-internal class SourceFile
+internal class ExcelNodeParser
 {
-    public SourceFile(string fileName)
+    public ExcelNodeParser(string fileName)
     {
         var exceptionList = new List<Exception>();
 

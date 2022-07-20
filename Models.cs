@@ -70,17 +70,43 @@ internal class Component : Node
     public Structurizr.Component StructurizrObject { get; set; }
 }
 
-internal class Edge
-{
-    public Edge(Node from, Node to)
-    {
-        this.From = from;
-        this.To = to;
-    }
 
-    public Node From { get; }
-    public Node To { get; }
+
+
+
+
+internal class Process
+{
+    public string Name { get; set; }
+
+    public List<Step> Steps { get; } = new();
+
+    
 }
+
+internal abstract class Step
+{
+    public string From { get; init; }
+    public string To { get; init; }
+    public string Description { get; init; }
+}
+
+internal class AsyncStep : Step
+{
+    public string Topic { get; init; }
+
+}
+
+internal class SyncStep : Step
+{
+
+}
+
+
+
+
+
+
 
 
 public sealed class Tags

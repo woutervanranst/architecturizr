@@ -14,6 +14,7 @@
     <None Remove="Structurizr.Client" />
     <None Remove="FluentValidation" />
     <None Remove="Microsoft.Extensions.Configuration.UserSecrets" />
+    <None Remove="InputParsers\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="ExcelToEnumerable" Version="0.3.10" />
@@ -21,5 +22,8 @@
     <PackageReference Include="Structurizr.Client" Version="1.0.0" />
     <PackageReference Include="FluentValidation" Version="11.0.3" />
     <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="InputParsers\" />
   </ItemGroup>
 </Project>
