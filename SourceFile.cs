@@ -50,20 +50,20 @@ internal class SourceFile
         //Components = nodes.Values.OfType<Component>().ToArray();
 
 
-        // Parse Edges Tab
-        var edgeRows = fileName.ExcelToEnumerable<EdgeRow>(
-            x => x.
-                UsingSheet("Edges")
-                .HeaderOnRow(2)
-                .StartingFromRow(3)
-                .OutputExceptionsTo(exceptionList)
-                .Property(x => x.Row).MapsToRowNumber()
-            );
+        //// Parse Edges Tab
+        //var edgeRows = fileName.ExcelToEnumerable<EdgeRow>(
+        //    x => x.
+        //        UsingSheet("Edges")
+        //        .HeaderOnRow(2)
+        //        .StartingFromRow(3)
+        //        .OutputExceptionsTo(exceptionList)
+        //        .Property(x => x.Row).MapsToRowNumber()
+        //    );
 
-        if (exceptionList.Any())
-            throw new Exception();
+        //if (exceptionList.Any())
+        //    throw new Exception();
 
-        Edges = ParseEdges(nodes, edgeRows);
+        //Edges = ParseEdges(nodes, edgeRows);
     }
 
     public string Title { get; init; }
@@ -76,7 +76,7 @@ internal class SourceFile
     // public IEnumerable<Container> Containers { get; init; }
     // public IEnumerable<Component> Components { get; init; }
 
-    public IEnumerable<Edge> Edges { get; init; }
+    // public IEnumerable<Edge> Edges { get; init; }
 
     /// <summary>
     /// Parse every row in the source to exactly one node type
@@ -166,25 +166,25 @@ internal class SourceFile
         return nodes;
     }
 
-    private IEnumerable<Edge> ParseEdges(IDictionary<string, Node> nodes, IEnumerable<EdgeRow> edgeRows)
-    {
-        var edges = new List<Edge>();
+    //private IEnumerable<Edge> ParseEdges(IDictionary<string, Node> nodes, IEnumerable<EdgeRow> edgeRows)
+    //{
+    //    var edges = new List<Edge>();
 
-        foreach (var row in edgeRows)
-        {
-            if (!nodes.ContainsKey(row.From))
-                throw new InvalidOperationException($"The 'From-node' {row.From} on row {row.Row} is not defined.");
-            if (!nodes.ContainsKey(row.To))
-                throw new InvalidOperationException($"The 'To-node' {row.To} on row {row.Row} is not defined.");
+    //    foreach (var row in edgeRows)
+    //    {
+    //        if (!nodes.ContainsKey(row.From))
+    //            throw new InvalidOperationException($"The 'From-node' {row.From} on row {row.Row} is not defined.");
+    //        if (!nodes.ContainsKey(row.To))
+    //            throw new InvalidOperationException($"The 'To-node' {row.To} on row {row.Row} is not defined.");
 
-            var fromNode = nodes[row.From];
-            var toNode = nodes[row.To];
+    //        var fromNode = nodes[row.From];
+    //        var toNode = nodes[row.To];
 
-            edges.Add(new Edge(fromNode, toNode));
-        }
+    //        edges.Add(new Edge(fromNode, toNode));
+    //    }
 
-        return edges;
-    }
+    //    return edges;
+    //}
 
     private class GeneralRow
     {
@@ -275,16 +275,16 @@ internal class SourceFile
         //    string.IsNullOrWhiteSpace(Description);
     }
 
-    private class EdgeRow
-    {
-        public int Row { get; init; }
-        public string From { get; init; }
-        public string To { get; init; }
-        public string A { get; init; }
-        public string B { get; init; }
-        public string E { get; init; }
-        public string F { get; init; }
-    }
+    //private class EdgeRow
+    //{
+    //    public int Row { get; init; }
+    //    public string From { get; init; }
+    //    public string To { get; init; }
+    //    public string A { get; init; }
+    //    public string B { get; init; }
+    //    public string E { get; init; }
+    //    public string F { get; init; }
+    //}
 }
 
 
