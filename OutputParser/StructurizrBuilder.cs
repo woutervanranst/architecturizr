@@ -82,6 +82,22 @@ internal class StructurizrBuilder
             v.EnableAutomaticLayout();
         }
 
+        foreach (var p in processes)
+        {
+            //var c = ((SoftwareSystem)nodes.Where(n => n.Key == "ivs-be").Single()).StructurizrObject;
+            var c = ((Container)nodes.Where(n => n.Key == "k8s").Single()).StructurizrObject;
+            var v = viewSet.CreateDynamicView(c, "process" + p.Name, p.Name);
+
+            foreach (var s in p.Steps)
+            {
+                v.Add(((dynamic)s.From).StructurizrObject, s.Description, ((dynamic)s.To).StructurizrObject);
+
+            }
+
+            v.EnableAutomaticLayout();
+
+        }
+
 
         /* Microservice
          * 
