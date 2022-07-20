@@ -7,14 +7,14 @@ namespace architecturizr.InputParsers;
 /// Read the Excel Source file
 /// https://stackoverflow.com/a/15793495
 /// </summary>
-internal class ExcelNodeParser
+internal class ExcelNodeParser : IINputParser<(string title, string description, IEnumerable<Node>)>
 {
-    public ExcelNodeParser(string fileName)
+    public (string title, string description, IEnumerable<Node>) Parse(FileInfo fi)
     {
         var exceptionList = new List<Exception>();
 
         // Parse General Tab
-        var generalRows = fileName.ExcelToEnumerable<GeneralRow>(
+        var generalRows = fi.FullName.ExcelToEnumerable<GeneralRow>(
             x => x
                 .UsingSheet("General")
                 .UsingHeaderNames(false) //map using column numbers, not names
@@ -24,12 +24,12 @@ internal class ExcelNodeParser
         if (exceptionList.Any())
             throw new Exception();
 
-        Title = generalRows.Single(r => r.Key == "Title").Value;
-        Description = generalRows.Single(r => r.Key == "Description").Value;
+        var title = generalRows.Single(r => r.Key == "Title").Value;
+        var description = generalRows.Single(r => r.Key == "Description").Value;
 
 
         // Parse Nodes Tab
-        var nodeRows = fileName.ExcelToEnumerable<NodeRow>(
+        var nodeRows = fi.FullName.ExcelToEnumerable<NodeRow>(
             x => x
                 .UsingSheet("Nodes")
                 .OutputExceptionsTo(exceptionList)
@@ -42,8 +42,7 @@ internal class ExcelNodeParser
         if (exceptionList.Any())
             throw new Exception();
 
-        var nodes = ParseNodes(nodeRows);
-        Nodes = nodes.Values;
+        var nodes = ParseNodes(nodeRows).Values;
 
         //Persons = nodes.Values.OfType<Person>().ToArray();
         //SoftwareSystems = nodes.Values.OfType<SoftwareSystem>().ToArray();
@@ -65,12 +64,16 @@ internal class ExcelNodeParser
         //    throw new Exception();
 
         //Edges = ParseEdges(nodes, edgeRows);
+
+        return (title, description, nodes);
     }
 
-    public string Title { get; init; }
-    public string Description { get; init; }
+    //public string Title { get; init; }
+    //public string Description { get; init; }
 
-    public IEnumerable<Node> Nodes { get; init; }
+    //public IEnumerable<Node> Nodes { get; init; }
+
+    
 
     // public IEnumerable<Person> Persons { get; init; }
     // public IEnumerable<SoftwareSystem> SoftwareSystems { get; init; }

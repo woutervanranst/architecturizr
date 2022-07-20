@@ -4,12 +4,8 @@ using architecturizr.Models;
 
 namespace architecturizr.InputParsers;
 
-internal class SequencediagramDotOrgProcessParser
+internal class SequencediagramDotOrgProcessParser : IINputParser<Process>
 {
-    public SequencediagramDotOrgProcessParser()
-    {
-    }
-
     public Process Parse(FileInfo f)
     {
         var lines = File.ReadAllLines(f.FullName)
