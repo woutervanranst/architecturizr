@@ -11,8 +11,8 @@ internal class Process
 
 internal abstract class Step
 {
-    public string From { get; init; }
-    public string To { get; init; }
+    public Node From { get; init; }
+    public Node To { get; init; }
     public string Description { get; init; }
 }
 

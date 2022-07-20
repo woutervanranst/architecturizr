@@ -7,9 +7,9 @@ namespace architecturizr.InputParsers;
 /// Read the Excel Source file
 /// https://stackoverflow.com/a/15793495
 /// </summary>
-internal class ExcelNodeParser : IINputParser<(string title, string description, IEnumerable<Node>)>
+internal class ExcelNodeParser : IINputParser<(string title, string description, IDictionary<string, Node>)>
 {
-    public (string title, string description, IEnumerable<Node>) Parse(FileInfo fi)
+    public (string title, string description, IDictionary<string, Node>) Parse(FileInfo fi)
     {
         var exceptionList = new List<Exception>();
 
@@ -42,7 +42,7 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
         if (exceptionList.Any())
             throw new Exception();
 
-        var nodes = ParseNodes(nodeRows).Values;
+        var nodes = ParseNodes(nodeRows);
 
         //Persons = nodes.Values.OfType<Person>().ToArray();
         //SoftwareSystems = nodes.Values.OfType<SoftwareSystem>().ToArray();

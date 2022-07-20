@@ -6,6 +6,13 @@ namespace architecturizr.InputParsers;
 
 internal class SequencediagramDotOrgProcessParser : IINputParser<Process>
 {
+    private readonly IDictionary<string, Node> nodes;
+
+    public SequencediagramDotOrgProcessParser(IDictionary<string, Node> nodes)
+    {
+        this.nodes = nodes;
+    }
+
     public Process Parse(FileInfo f)
     {
         var lines = File.ReadAllLines(f.FullName)
@@ -49,8 +56,8 @@ internal class SequencediagramDotOrgProcessParser : IINputParser<Process>
 
                 var s = new SyncStep()
                 {
-                    From = from,
-                    To = to,
+                    From = nodes[from],
+                    To = nodes[to],
                     Description = description
                 };
 
@@ -65,8 +72,8 @@ internal class SequencediagramDotOrgProcessParser : IINputParser<Process>
 
                 var s = new AsyncStep()
                 {
-                    From = from,
-                    To = to,
+                    From = nodes[from],
+                    To = nodes[to],
                     Topic = topic,
                     Description = description,
                 };
