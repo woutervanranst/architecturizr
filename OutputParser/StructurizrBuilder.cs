@@ -11,44 +11,47 @@ internal class StructurizrBuilder
         var workspace = new Structurizr.Workspace(title, description);
         var model = workspace.Model;
 
+        model.ImpliedRelationshipsStrategy = new Structurizr.CreateImpliedRelationshipsUnlessAnyRelationshipExistsStrategy(); // ! IMPORTANT, see https://github.com/structurizr/dotnet/issues/97
+
+
         // Add Nodes
         nodes = GetNodesInUse(processes).Distinct().ToArray();
         AddNodes(nodes, model);
 
 
-
-
-
-
         // Add Edges
+        foreach (var p in processes)
+        {
+            foreach (var s in p.Steps)
+            {
+                ((dynamic)s).From.StructurizrObject.Uses(((dynamic)s.To).StructurizrObject, p.Name);
+            }
 
-
-        //foreach (var edge in s.Edges)
+        }
+        //foreach (var steps in processes.SelectMany(p => p.Steps))
         //{
-        //    ((dynamic)edge).From.StructurizrObject.Uses(((dynamic)edge.To).StructurizrObject, "Uses2");
+        //    ((dynamic)steps).From.StructurizrObject.Uses(((dynamic)steps.To).StructurizrObject, steps.Description);
         //}
 
 
-        model.ImpliedRelationshipsStrategy = new Structurizr.CreateImpliedRelationshipsUnlessAnyRelationshipExistsStrategy(); // ! IMPORTANT, see https://github.com/structurizr/dotnet/issues/97
-
-
+        // Add Views
         var viewSet = workspace.Views;
         viewSet.Configuration.ViewSortOrder = Structurizr.ViewSortOrder.Type;
 
         foreach (var ss in nodes.OfType<SoftwareSystem>())
         {
-            var v = viewSet.CreateSystemContextView(ss.StructurizrObject, ss.Key, "hahaha");
-
+            var v = viewSet.CreateSystemContextView(ss.StructurizrObject, ss.Key, $"Helicopter view of '{ss.Name}'");
             v.Title = $"[(1) System Context] {ss.Name}";
+
             v.AddAllElements();
             v.EnableAutomaticLayout(Structurizr.RankDirection.TopBottom, 200, 200, 200, false);
         }
 
         foreach (var ss in nodes.OfType<SoftwareSystem>())
         {
-            var v = viewSet.CreateContainerView(ss.StructurizrObject, "c" + ss.Key, "hahaha");
-
+            var v = viewSet.CreateContainerView(ss.StructurizrObject, "c" + ss.Key, $"What is inside/interacts with '{ss.Name}'");
             v.Title = $"[(2) Container] {ss.Name}";
+
             v.AddAllElements();
             v.EnableAutomaticLayout(Structurizr.RankDirection.TopBottom, 200, 200, 200, false);
             // v.PaperSize = Structurizr.PaperSize.A0_Landscape;
@@ -59,22 +62,20 @@ internal class StructurizrBuilder
             if (c.Children.Count == 0) // if this Container does not have any children (Components), the diagram will not show anything useful
                 continue;
 
-            var v = viewSet.CreateComponentView(c.StructurizrObject, c.Key, "hehfdhjdfd");
+            var v = viewSet.CreateComponentView(c.StructurizrObject, c.Key, $"What is inside/interacts with {c.Name}");
 
-            v.Title = $"[(3) Component 123] {c.Name}";
-            v.Description = $"What is inside {c.Name}";
+            v.Title = $"[(3) Component ALL] {c.Name}";
 
             v.AddAllElements();
-            // v.EnableAutomaticLayout( Structurizr.RankDirection.TopBottom, 200, 200, 200, false);
+            v.EnableAutomaticLayout( Structurizr.RankDirection.TopBottom, 200, 200, 200, false);
             // v.PaperSize = Structurizr.PaperSize.A0_Landscape;
         }
 
         foreach (var c in nodes.OfType<Component>())
         {
-            var v = viewSet.CreateComponentView(c.Parent.StructurizrObject, "component-" + c.Key, "hahad");
+            var v = viewSet.CreateComponentView(c.Parent.StructurizrObject, "component-" + c.Key, $"What interacts with {c.Name}");
+            v.Title = $"[(3) Component DIRECT] {c.Name}";
 
-            v.Title = $"[(3) Component] {c.Name}";
-            v.Description = $"What interacts with {c.Name}";
             v.Add(c.StructurizrObject);
             v.AddNearestNeighbours(c.StructurizrObject);
 
@@ -115,8 +116,6 @@ internal class StructurizrBuilder
     {
         foreach (var n in ps.SelectMany(p => p.Steps).SelectMany(s => new Node[] { s.From, s.To }))
         {
-            // while ((n = s.From) != null)
-            //{
             yield return n;
 
             if (n is Person)
@@ -156,8 +155,14 @@ internal class StructurizrBuilder
             var c = comp.StructurizrObject = comp.Parent.StructurizrObject.AddComponent(comp.Name, comp.Description, comp.Technology);
 
             c.AddTags(c.Technology);
-            if (!string.IsNullOrWhiteSpace(comp.Owner))
-                c.AddTags("IVS");
+            //if (!string.IsNullOrWhiteSpace(comp.Owner))
+            //    c.AddTags("IVS");
+        }
+
+        foreach (var n in nodes)
+        {
+            if (!string.IsNullOrWhiteSpace(n.Owner))
+                ((dynamic)n).StructurizrObject.AddTags("IVS");
         }
 
         // THIS IS THE OLD CODE THAT ADDS ALL COMPONENTS REGARDLESS OF BEING USED
