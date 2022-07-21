@@ -48,6 +48,10 @@ internal class SequencediagramDotOrgProcessParser : IINputParser<Process>
             {
                 // Comment line
             }
+            else if (line.StartsWith("note"))
+            {
+                // Note
+            }
             else if (syncRegex.Match(line) is var r1 && r1.Success)
             {
                 var from = r1.Groups["from"].Value;
@@ -80,6 +84,8 @@ internal class SequencediagramDotOrgProcessParser : IINputParser<Process>
 
                 p.Steps.Add(s);
             }
+            else
+                throw new Exception();
         }
 
         return p;
