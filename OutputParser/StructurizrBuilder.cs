@@ -25,7 +25,14 @@ internal class StructurizrBuilder
         {
             foreach (var s in p.Steps)
             {
-                ((dynamic)s).From.StructurizrObject.Uses(((dynamic)s.To).StructurizrObject, p.Name);
+                var r = (Structurizr.Relationship)((dynamic)s).From.StructurizrObject.Uses(((dynamic)s.To).StructurizrObject, p.Name);
+
+                if (s is AsyncStep)
+                    r.AddTags("async");
+                else if (s is SyncStep)
+                    r.AddTags("sync");
+                else
+                    throw new Exception();
             }
 
         }
@@ -92,11 +99,9 @@ internal class StructurizrBuilder
             foreach (var s in p.Steps)
             {
                 v.Add(((dynamic)s.From).StructurizrObject, s.Description, ((dynamic)s.To).StructurizrObject);
-
             }
 
             v.EnableAutomaticLayout();
-
         }
 
 
@@ -122,6 +127,9 @@ internal class StructurizrBuilder
         styles.Add(new Structurizr.ElementStyle(Tags.Scala) { Icon = Icons.scalaPng });
 
         styles.Add(new Structurizr.ElementStyle("IVS") { Background = "#e7285d" });
+
+        styles.Add(new Structurizr.RelationshipStyle("sync") { Dashed = false });
+        styles.Add(new Structurizr.RelationshipStyle("async") { Dashed = true });
 
         var structurizrClient = new StructurizrClient(apiKey, apiSecret);
         structurizrClient.PutWorkspace(workspaceId, workspace);
@@ -152,6 +160,8 @@ internal class StructurizrBuilder
                 yield return comp.Parent;
                 yield return comp.Parent.Parent;
             }
+            else
+                throw new Exception();
         }
     }
 
