@@ -26,8 +26,6 @@ internal class StructurizrBuilder
         {
             foreach (var s in p.Steps)
             {
-                //var r = s.From.GetStructurizrObject().GetEfferentRelationshipWith(s.To.GetStructurizrObject());
-
                 //if (r is null)
                 //    r = s.From.GetStructurizrObject().Uses((dynamic)s.To.GetStructurizrObject(), p.Name);
                 //else
@@ -37,34 +35,47 @@ internal class StructurizrBuilder
                 //    r = s.From.GetStructurizrObject().Uses((dynamic)s.To.GetStructurizrObject(), d);
                 //}
 
+                Structurizr.InteractionStyle tag;
+                string name;
+
+                if (s is AsyncStep ss)
+                {
+                    tag = Structurizr.InteractionStyle.Asynchronous;
+                    name = $"{p.Name} [{ss.Topic}]";
+                }
+                else if (s is SyncStep)
+                {
+                    tag = Structurizr.InteractionStyle.Synchronous;
+                    //technology = "gRPC or REST";
+                    name = p.Name;
+                }
+                else
+                    throw new Exception();
 
 
-                //Container c;
-                //c.StructurizrObject.Uses()
-                //dynamic x = ((dynamic)s).From.StructurizrObject.Uses(((dynamic)s.To).StructurizrObject, p.Name + Random.Shared.Next());
-
-
-                var r = s.From.GetStructurizrObject().Uses((dynamic)s.To.GetStructurizrObject(), p.Name);
-
-                Console.WriteLine(s.From.ToString() + " -- " + s.To.ToString());
-
-                //var r = (Structurizr.Relationship)x;
-
+                var r = s.From.GetStructurizrObject().Uses((dynamic)s.To.GetStructurizrObject(), name, "", tag);
                 if (r is null)
                 {
                     var r1 = s.From.GetStructurizrObject().GetEfferentRelationshipWith(s.To.GetStructurizrObject());
-                    logger.LogWarning($"'{s.From}' already has a relationship with '{s.To}' with the same description '{r1.Description}'. Not adding it again.");
+                    logger.LogInformation($"'{s.From}' already has a relationship with '{s.To}' with the same description '{r1.Description}'. Not adding it again.");
+
+                    if (r1.InteractionStyle != tag)
+                    {
+                        logger.LogWarning($"'{s.From}' already has a relationship with '{s.To}' with the same description '{r1.Description}'. Not adding it again.");
+
+                        //r1.InteractionStyle = Structurizr.InteractionStyle.Synchronous;
+                    }
 
                     continue;
                 }
-                    
 
-                if (s is AsyncStep)
-                    r.AddTags("async");
-                else if (s is SyncStep)
-                    r.AddTags("sync");
-                else
-                    throw new Exception();
+
+                //if (s is AsyncStep)
+                //    r.AddTags("async");
+                //else if (s is SyncStep)
+                //    r.AddTags("sync");
+                //else
+                //    throw new Exception();
             }
 
         }
@@ -107,7 +118,7 @@ internal class StructurizrBuilder
             v.Title = $"[(3) Component ALL] {c.Name}";
 
             v.AddAllElements();
-            v.EnableAutomaticLayout( Structurizr.RankDirection.TopBottom, 200, 200, 200, false);
+            v.EnableAutomaticLayout(Structurizr.RankDirection.TopBottom, 200, 200, 200, false);
             // v.PaperSize = Structurizr.PaperSize.A0_Landscape;
         }
 
@@ -127,10 +138,23 @@ internal class StructurizrBuilder
             //var c = ((SoftwareSystem)nodes.Where(n => n.Key == "ivs-be").Single()).StructurizrObject;
             var c = ((Container)nodes.Where(n => n.Key == "k8s").Single()).GetStructurizrObject();
             var v = viewSet.CreateDynamicView(c, $"process-{p.Name.ToKebabCase()}", p.Name);
+            v.Title = p.Name;
 
             foreach (var s in p.Steps)
             {
-                v.Add(s.From.GetStructurizrObject(), s.Description, s.To.GetStructurizrObject());
+
+                // NOTE: v.Add() Only adds the first relationship to the diagram.
+                // Element.GetEfferentRelationshipWith only yields the first relationship.
+                //var r = v.Add(s.From.GetStructurizrObject(), s.Description, s.To.GetStructurizrObject());
+
+                foreach (var r in s.From.GetStructurizrObject().Relationships)
+                {
+                    if (s.To.GetStructurizrObject() == r.Destination)
+                        v.Add(r);
+                }
+
+                //v.Add(new Structurizr.Relationship())
+
             }
 
             v.EnableAutomaticLayout();
@@ -160,14 +184,48 @@ internal class StructurizrBuilder
 
         styles.Add(new Structurizr.ElementStyle("IVS") { Background = "#e7285d" });
 
-        styles.Add(new Structurizr.RelationshipStyle("sync") { Dashed = false });
-        styles.Add(new Structurizr.RelationshipStyle("async") { Dashed = true });
+        styles.Add(new Structurizr.RelationshipStyle(Structurizr.Tags.Synchronous) { Dashed = false });
+        styles.Add(new Structurizr.RelationshipStyle(Structurizr.Tags.Asynchronous) { Dashed = true });
+
+        UploadWorkspace(workspaceId, apiKey, apiSecret, workspace);
+    }
+
+    private static void UploadWorkspace(long workspaceId, string apiKey, string apiSecret, Structurizr.Workspace workspace)
+    {
+        workspace = new Structurizr.Workspace("ws", "desc");
+        var model = workspace.Model;
+       
+        var a = model.AddSoftwareSystem("a");
+        var c1 = a.AddContainer("c1");
+        var c2 = a.AddContainer("c2");
+
+        var r1 = c1.Uses(c2, "Uses Sync", "", Structurizr.InteractionStyle.Synchronous);
+        var r2 = c1.Uses(c2, "Uses Async", "", Structurizr.InteractionStyle.Asynchronous);
+    
+        var viewSet = workspace.Views;
+        var v1 = viewSet.CreateContainerView(a, "b", "descr");
+        v1.AddAllElements();
+        v1.EnableAutomaticLayout();
+
+
+        var v2 = viewSet.CreateDynamicView(a, "b-dynamic", "");
+        v2.Add(c1, "sync", c2);
+        v2.Add(c1, "async", c2);
+
+
+        v2.Add(r1);
+        v2.Add(r2);
+
+        v2.EnableAutomaticLayout();
+
+        var styles = viewSet.Configuration.Styles;
+        styles.Add(new Structurizr.RelationshipStyle(Structurizr.Tags.Synchronous) { Dashed = false });
+        styles.Add(new Structurizr.RelationshipStyle(Structurizr.Tags.Asynchronous) { Dashed = true });
 
         var structurizrClient = new StructurizrClient(apiKey, apiSecret);
         structurizrClient.PutWorkspace(workspaceId, workspace);
     }
 
-    
 
     private static IEnumerable<Node> GetNodesInUse(IEnumerable<Process> ps)
     {
