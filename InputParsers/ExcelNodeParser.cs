@@ -113,7 +113,7 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
             {
                 if (n != null)
                     throw new InvalidOperationException($"Row #{row.Row} matches multiple types");
-
+                
                 // Software System
                 n = new SoftwareSystem(row.SoftwareSystemKey)
                 {

@@ -25,7 +25,18 @@ internal class StructurizrBuilder
         {
             foreach (var s in p.Steps)
             {
-                var r = (Structurizr.Relationship)((dynamic)s).From.StructurizrObject.Uses(((dynamic)s.To).StructurizrObject, p.Name);
+                //Container c;
+                //c.StructurizrObject.Uses()
+                //dynamic x = ((dynamic)s).From.StructurizrObject.Uses(((dynamic)s.To).StructurizrObject, p.Name + Random.Shared.Next());
+
+                var r = s.From.GetStructurizrObject().Uses((dynamic)s.To.GetStructurizrObject(), p.Name);
+
+                Console.WriteLine(s.From.ToString() + " -- " + s.To.ToString());
+
+                //var r = (Structurizr.Relationship)x;
+
+                if (r is null)
+                    continue;
 
                 if (s is AsyncStep)
                     r.AddTags("async");
@@ -48,7 +59,7 @@ internal class StructurizrBuilder
 
         foreach (var ss in nodes.OfType<SoftwareSystem>())
         {
-            var v = viewSet.CreateSystemContextView(ss.StructurizrObject, ss.Key, $"Helicopter view of '{ss.Name}'");
+            var v = viewSet.CreateSystemContextView(ss.GetStructurizrObject(), ss.Key, $"Helicopter view of '{ss.Name}'");
             v.Title = $"[(1) System Context] {ss.Name}";
 
             v.AddAllElements();
@@ -57,7 +68,7 @@ internal class StructurizrBuilder
 
         foreach (var ss in nodes.OfType<SoftwareSystem>())
         {
-            var v = viewSet.CreateContainerView(ss.StructurizrObject, "c" + ss.Key, $"Interactions with the insides of '{ss.Name}'");
+            var v = viewSet.CreateContainerView(ss.GetStructurizrObject(), "c" + ss.Key, $"Interactions with the insides of '{ss.Name}'");
             v.Title = $"[(2) Container] {ss.Name}";
 
             v.AddAllElements();
@@ -70,7 +81,7 @@ internal class StructurizrBuilder
             if (c.Children.Count == 0) // if this Container does not have any children (Components), the diagram will not show anything useful
                 continue;
 
-            var v = viewSet.CreateComponentView(c.StructurizrObject, c.Key, $"What is inside/interacts with {c.Name}");
+            var v = viewSet.CreateComponentView(c.GetStructurizrObject(), c.Key, $"What is inside/interacts with {c.Name}");
 
             v.Title = $"[(3) Component ALL] {c.Name}";
 
@@ -81,11 +92,11 @@ internal class StructurizrBuilder
 
         foreach (var c in nodes.OfType<Component>())
         {
-            var v = viewSet.CreateComponentView(c.Parent.StructurizrObject, "component-" + c.Key, $"What interacts with {c.Name}");
+            var v = viewSet.CreateComponentView(c.Parent.GetStructurizrObject(), "component-" + c.Key, $"What interacts with {c.Name}");
             v.Title = $"[(3) Component DIRECT] {c.Name}";
 
-            v.Add(c.StructurizrObject);
-            v.AddNearestNeighbours(c.StructurizrObject);
+            v.Add(c.GetStructurizrObject());
+            v.AddNearestNeighbours(c.GetStructurizrObject());
 
             v.EnableAutomaticLayout();
         }
@@ -93,12 +104,12 @@ internal class StructurizrBuilder
         foreach (var p in processes)
         {
             //var c = ((SoftwareSystem)nodes.Where(n => n.Key == "ivs-be").Single()).StructurizrObject;
-            var c = ((Container)nodes.Where(n => n.Key == "k8s").Single()).StructurizrObject;
+            var c = ((Container)nodes.Where(n => n.Key == "k8s").Single()).GetStructurizrObject();
             var v = viewSet.CreateDynamicView(c, $"process-{p.Name.ToKebabCase()}", p.Name);
 
             foreach (var s in p.Steps)
             {
-                v.Add(((dynamic)s.From).StructurizrObject, s.Description, ((dynamic)s.To).StructurizrObject);
+                v.Add(s.From.GetStructurizrObject(), s.Description, s.To.GetStructurizrObject());
             }
 
             v.EnableAutomaticLayout();
@@ -169,17 +180,18 @@ internal class StructurizrBuilder
     {
         // Only the nodes in use
         foreach (var person in nodes.OfType<Person>())
-            person.StructurizrObject = model.AddPerson(person.Name, person.Description);
+            person.SetStructurizrObject(model.AddPerson(person.Name, person.Description));
 
         foreach (var ss in nodes.OfType<SoftwareSystem>())
-            ss.StructurizrObject = model.AddSoftwareSystem(ss.Name, ss.Description);
+            ss.SetStructurizrObject(model.AddSoftwareSystem(ss.Name, ss.Description));
 
         foreach (var cont in nodes.OfType<Container>())
-            cont.StructurizrObject = cont.Parent.StructurizrObject.AddContainer(cont.Name, cont.Description, cont.Technology);
+            cont.SetStructurizrObject(cont.Parent.GetStructurizrObject().AddContainer(cont.Name, cont.Description, cont.Technology));
 
         foreach (var comp in nodes.OfType<Component>())
         {
-            var c = comp.StructurizrObject = comp.Parent.StructurizrObject.AddComponent(comp.Name, comp.Description, comp.Technology);
+            var c = comp.Parent.GetStructurizrObject().AddComponent(comp.Name, comp.Description, comp.Technology);
+            comp.SetStructurizrObject(c);
 
             c.AddTags(c.Technology);
             //if (!string.IsNullOrWhiteSpace(comp.Owner))
@@ -189,7 +201,8 @@ internal class StructurizrBuilder
         foreach (var n in nodes)
         {
             if (!string.IsNullOrWhiteSpace(n.Owner))
-                ((dynamic)n).StructurizrObject.AddTags("IVS");
+                n.GetStructurizrObject().AddTags("IVS");
+                //((dynamic)n).GetStructurizrObject().AddTags("IVS");
         }
 
         // THIS IS THE OLD CODE THAT ADDS ALL COMPONENTS REGARDLESS OF BEING USED
