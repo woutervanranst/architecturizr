@@ -1,5 +1,6 @@
 ﻿using architecturizr.Models;
 using ExcelToEnumerable;
+using Microsoft.Extensions.Logging;
 
 namespace architecturizr.InputParsers;
 
@@ -9,6 +10,13 @@ namespace architecturizr.InputParsers;
 /// </summary>
 internal class ExcelNodeParser : IINputParser<(string title, string description, IDictionary<string, Node>)>
 {
+    private readonly ILogger<ExcelNodeParser> logger;
+
+    public ExcelNodeParser(ILogger<ExcelNodeParser> logger)
+    {
+        this.logger = logger;
+    }
+
     public (string title, string description, IDictionary<string, Node>) Parse(FileInfo fi)
     {
         var exceptionList = new List<Exception>();

@@ -1,15 +1,25 @@
 ﻿using System;
 using System.Text.RegularExpressions;
 using architecturizr.Models;
+using Microsoft.Extensions.Logging;
 
 namespace architecturizr.InputParsers;
 
 internal class SequencediagramDotOrgProcessParser : IINputParser<Process>
 {
-    private readonly IDictionary<string, Node> nodes;
-
-    public SequencediagramDotOrgProcessParser(IDictionary<string, Node> nodes)
+    public SequencediagramDotOrgProcessParser(ILogger<SequencediagramDotOrgProcessParser> logger)
     {
+        this.logger = logger;
+    }
+
+    private IDictionary<string, Node> nodes;
+    private readonly ILogger<SequencediagramDotOrgProcessParser> logger;
+
+    public void SetNodes(IDictionary<string, Node> nodes)
+    {
+        if (this.nodes is not null)
+            throw new InvalidOperationException("Nodes can only be set once");
+
         this.nodes = nodes;
     }
 

@@ -1,12 +1,13 @@
 ﻿using architecturizr.Models;
 using architecturizr.Utils;
+using Microsoft.Extensions.Logging;
 using Structurizr.Api;
 
 namespace architecturizr.OutputParser;
 
 internal class StructurizrBuilder
 {
-    public StructurizrBuilder(string title, string description, IEnumerable<Node> nodes, IEnumerable<Process> processes, long workspaceId, string apiKey, string apiSecret)
+    public StructurizrBuilder(ILogger<StructurizrBuilder> logger, string title, string description, IEnumerable<Node> nodes, IEnumerable<Process> processes, long workspaceId, string apiKey, string apiSecret)
     {
         // Configure Workspace
         var workspace = new Structurizr.Workspace(title, description);
@@ -25,9 +26,23 @@ internal class StructurizrBuilder
         {
             foreach (var s in p.Steps)
             {
+                //var r = s.From.GetStructurizrObject().GetEfferentRelationshipWith(s.To.GetStructurizrObject());
+
+                //if (r is null)
+                //    r = s.From.GetStructurizrObject().Uses((dynamic)s.To.GetStructurizrObject(), p.Name);
+                //else
+                //{
+                //    var d = r.Description + p.Name;
+                //    var rr = s.From.GetStructurizrObject().Relationships.Remove(r);
+                //    r = s.From.GetStructurizrObject().Uses((dynamic)s.To.GetStructurizrObject(), d);
+                //}
+
+
+
                 //Container c;
                 //c.StructurizrObject.Uses()
                 //dynamic x = ((dynamic)s).From.StructurizrObject.Uses(((dynamic)s.To).StructurizrObject, p.Name + Random.Shared.Next());
+
 
                 var r = s.From.GetStructurizrObject().Uses((dynamic)s.To.GetStructurizrObject(), p.Name);
 
@@ -36,7 +51,13 @@ internal class StructurizrBuilder
                 //var r = (Structurizr.Relationship)x;
 
                 if (r is null)
+                {
+                    var r1 = s.From.GetStructurizrObject().GetEfferentRelationshipWith(s.To.GetStructurizrObject());
+                    logger.LogWarning($"'{s.From}' already has a relationship with '{s.To}' with the same description '{r1.Description}'. Not adding it again.");
+
                     continue;
+                }
+                    
 
                 if (s is AsyncStep)
                     r.AddTags("async");

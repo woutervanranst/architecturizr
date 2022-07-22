@@ -18,6 +18,9 @@
     <None Remove="OutputParser\" />
     <None Remove="Models\" />
     <None Remove="Utils\" />
+    <None Remove="Microsoft.Extensions.Logging" />
+    <None Remove="Microsoft.Extensions.Logging.Console" />
+    <None Remove="Microsoft.Extensions.DependencyInjection" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="ExcelToEnumerable" Version="0.3.10" />
@@ -25,6 +28,8 @@
     <PackageReference Include="Structurizr.Client" Version="1.0.0" />
     <PackageReference Include="FluentValidation" Version="11.1.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="InputParsers\" />
