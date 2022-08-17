@@ -26,64 +26,33 @@ internal class StructurizrBuilder
         {
             foreach (var s in p.Steps)
             {
-                //if (r is null)
-                //    r = s.From.GetStructurizrObject().Uses((dynamic)s.To.GetStructurizrObject(), p.Name);
-                //else
-                //{
-                //    var d = r.Description + p.Name;
-                //    var rr = s.From.GetStructurizrObject().Relationships.Remove(r);
-                //    r = s.From.GetStructurizrObject().Uses((dynamic)s.To.GetStructurizrObject(), d);
-                //}
-
-                Structurizr.InteractionStyle tag;
-                string name;
-
-                if (s is AsyncStep ss)
-                {
-                    tag = Structurizr.InteractionStyle.Asynchronous;
-                    name = $"{p.Name} [{ss.Topic}]";
-                }
+                Structurizr.InteractionStyle interactionStyle;
+                if (s is AsyncStep)
+                    interactionStyle = Structurizr.InteractionStyle.Asynchronous;
                 else if (s is SyncStep)
-                {
-                    tag = Structurizr.InteractionStyle.Synchronous;
-                    //technology = "gRPC or REST";
-                    name = p.Name;
-                }
+                    interactionStyle = Structurizr.InteractionStyle.Synchronous;
                 else
                     throw new Exception();
 
+                // TODO To add multiple arrows per interaction style, use a different description
 
-                var r = s.From.GetStructurizrObject().Uses((dynamic)s.To.GetStructurizrObject(), name, "", tag);
+                Structurizr.Relationship r = s.From.GetStructurizrObject().Uses((dynamic)s.To.GetStructurizrObject(), p.Name, "", interactionStyle);
+                    // returns null if the relationship already exists
+
                 if (r is null)
                 {
-                    var r1 = s.From.GetStructurizrObject().GetEfferentRelationshipWith(s.To.GetStructurizrObject());
-                    logger.LogInformation($"'{s.From}' already has a relationship with '{s.To}' with the same description '{r1.Description}'. Not adding it again.");
+                    // Check whether a synchronous relationship (solid line) hides an asynchronous relationship (dashed)
+                    var ers = s.From.GetStructurizrObject().GetEfferentRelationshipsWith(s.To.GetStructurizrObject());
 
-                    if (r1.InteractionStyle != tag)
-                    {
-                        logger.LogWarning($"'{s.From}' already has a relationship with '{s.To}' with the same description '{r1.Description}'. Not adding it again.");
-
-                        //r1.InteractionStyle = Structurizr.InteractionStyle.Synchronous;
-                    }
+                    if (ers.Where(er => er.InteractionStyle != interactionStyle) is var ersis && ersis.Any())
+                        foreach (var ersi in ersis)
+                            logger.LogWarning($"A(n) {ersi.InteractionStyle} relationship is hiding a new {interactionStyle} relationship between '{s.From}' and '{s.To}' in the process '{ersi.Description}'.");
 
                     continue;
                 }
-
-
-                //if (s is AsyncStep)
-                //    r.AddTags("async");
-                //else if (s is SyncStep)
-                //    r.AddTags("sync");
-                //else
-                //    throw new Exception();
             }
 
         }
-        //foreach (var steps in processes.SelectMany(p => p.Steps))
-        //{
-        //    ((dynamic)steps).From.StructurizrObject.Uses(((dynamic)steps.To).StructurizrObject, steps.Description);
-        //}
-
 
         // Add Views
         var viewSet = workspace.Views;
@@ -142,22 +111,37 @@ internal class StructurizrBuilder
 
             foreach (var s in p.Steps)
             {
+                string d;
+                Structurizr.InteractionStyle interactionStyle;
+                if (s is AsyncStep ss)
+                {
+                    d = $"{s.Description}\n[{ss.Topic}]";
+                    interactionStyle = Structurizr.InteractionStyle.Asynchronous;
+                }
+                else if (s is SyncStep)
+                {
+                    d = s.Description;
+                    interactionStyle = Structurizr.InteractionStyle.Synchronous;
+
+                    if (string.IsNullOrWhiteSpace(s.Description))
+                        logger.LogWarning($"Description is empty - may show erroneously on diagram");
+                }
+                else
+                    throw new Exception();
 
                 // NOTE: v.Add() Only adds the first relationship to the diagram.
                 // Element.GetEfferentRelationshipWith only yields the first relationship.
-                //var r = v.Add(s.From.GetStructurizrObject(), s.Description, s.To.GetStructurizrObject());
+                var r = v.Add(s.From.GetStructurizrObject(), d, s.To.GetStructurizrObject());
+                r.Relationship.InteractionStyle = interactionStyle;
 
-                foreach (var r in s.From.GetStructurizrObject().Relationships)
-                {
-                    if (s.To.GetStructurizrObject() == r.Destination)
-                        v.Add(r);
-                }
-
-                //v.Add(new Structurizr.Relationship())
-
+                //foreach (var r in s.From.GetStructurizrObject().Relationships)
+                 //   if (s.To.GetStructurizrObject() == r.Destination)
+                //        v.Add(r, Structurizr.InteractionStyle.Asynchronous);
+                
             }
 
-            v.EnableAutomaticLayout();
+            
+            v.EnableAutomaticLayout(Structurizr.RankDirection.LeftRight, 200, 200, 200, false);
         }
 
 
@@ -184,41 +168,6 @@ internal class StructurizrBuilder
 
         styles.Add(new Structurizr.ElementStyle("IVS") { Background = "#e7285d" });
 
-        styles.Add(new Structurizr.RelationshipStyle(Structurizr.Tags.Synchronous) { Dashed = false });
-        styles.Add(new Structurizr.RelationshipStyle(Structurizr.Tags.Asynchronous) { Dashed = true });
-
-        UploadWorkspace(workspaceId, apiKey, apiSecret, workspace);
-    }
-
-    private static void UploadWorkspace(long workspaceId, string apiKey, string apiSecret, Structurizr.Workspace workspace)
-    {
-        workspace = new Structurizr.Workspace("ws", "desc");
-        var model = workspace.Model;
-       
-        var a = model.AddSoftwareSystem("a");
-        var c1 = a.AddContainer("c1");
-        var c2 = a.AddContainer("c2");
-
-        var r1 = c1.Uses(c2, "Uses Sync", "", Structurizr.InteractionStyle.Synchronous);
-        var r2 = c1.Uses(c2, "Uses Async", "", Structurizr.InteractionStyle.Asynchronous);
-    
-        var viewSet = workspace.Views;
-        var v1 = viewSet.CreateContainerView(a, "b", "descr");
-        v1.AddAllElements();
-        v1.EnableAutomaticLayout();
-
-
-        var v2 = viewSet.CreateDynamicView(a, "b-dynamic", "");
-        v2.Add(c1, "sync", c2);
-        v2.Add(c1, "async", c2);
-
-
-        v2.Add(r1);
-        v2.Add(r2);
-
-        v2.EnableAutomaticLayout();
-
-        var styles = viewSet.Configuration.Styles;
         styles.Add(new Structurizr.RelationshipStyle(Structurizr.Tags.Synchronous) { Dashed = false });
         styles.Add(new Structurizr.RelationshipStyle(Structurizr.Tags.Asynchronous) { Dashed = true });
 
