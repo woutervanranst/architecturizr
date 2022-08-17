@@ -22,37 +22,7 @@ internal class StructurizrBuilder
 
 
         // Add Edges
-        foreach (var p in processes)
-        {
-            foreach (var s in p.Steps)
-            {
-                Structurizr.InteractionStyle interactionStyle;
-                if (s is AsyncStep)
-                    interactionStyle = Structurizr.InteractionStyle.Asynchronous;
-                else if (s is SyncStep)
-                    interactionStyle = Structurizr.InteractionStyle.Synchronous;
-                else
-                    throw new Exception();
-
-                // TODO To add multiple arrows per interaction style, use a different description
-
-                Structurizr.Relationship r = s.From.GetStructurizrObject().Uses((dynamic)s.To.GetStructurizrObject(), p.Name, "", interactionStyle);
-                    // returns null if the relationship already exists
-
-                if (r is null)
-                {
-                    // Check whether a synchronous relationship (solid line) hides an asynchronous relationship (dashed)
-                    var ers = s.From.GetStructurizrObject().GetEfferentRelationshipsWith(s.To.GetStructurizrObject());
-
-                    if (ers.Where(er => er.InteractionStyle != interactionStyle) is var ersis && ersis.Any())
-                        foreach (var ersi in ersis)
-                            logger.LogWarning($"A(n) {ersi.InteractionStyle} relationship is hiding a new {interactionStyle} relationship between '{s.From}' and '{s.To}' in the process '{ersi.Description}'.");
-
-                    continue;
-                }
-            }
-
-        }
+        AddEdges(logger, processes);
 
         // Add Views
         var viewSet = workspace.Views;
@@ -135,12 +105,12 @@ internal class StructurizrBuilder
                 r.Relationship.InteractionStyle = interactionStyle;
 
                 //foreach (var r in s.From.GetStructurizrObject().Relationships)
-                 //   if (s.To.GetStructurizrObject() == r.Destination)
+                //   if (s.To.GetStructurizrObject() == r.Destination)
                 //        v.Add(r, Structurizr.InteractionStyle.Asynchronous);
-                
+
             }
 
-            
+
             v.EnableAutomaticLayout(Structurizr.RankDirection.LeftRight, 200, 200, 200, false);
         }
 
@@ -175,6 +145,62 @@ internal class StructurizrBuilder
         structurizrClient.PutWorkspace(workspaceId, workspace);
     }
 
+    private static void AddEdges(ILogger<StructurizrBuilder> logger, IEnumerable<Process> processes)
+    {
+        foreach (var p in processes)
+        {
+            foreach (var s in p.Steps)
+            {
+                Structurizr.InteractionStyle interactionStyle;
+                if (s is AsyncStep)
+                    interactionStyle = Structurizr.InteractionStyle.Asynchronous;
+                else if (s is SyncStep)
+                    interactionStyle = Structurizr.InteractionStyle.Synchronous;
+                else
+                    throw new Exception();
+
+                //// Check if an interaction between From and To already exist with this interaction style
+                //var r0 = s.From.GetStructurizrObject().GetEfferentRelationshipsWith(s.To.GetStructurizrObject())
+                //    .Where(r => r.InteractionStyle == interactionStyle);
+                //var r = r0
+                //    .SingleOrDefault(); // there should be only one or zero
+
+                //// Construct the name of the interaction, concatenating all process names
+                //string d = string.Empty;
+                //if (r is not null)
+                //{
+                //    d = r.Description + "\n";
+                //    var rr = s.From.GetStructurizrObject().Relationships.Remove(r); // remove the existing relationship -- we cannot update the description
+                //    if (!rr)
+                //        throw new Exception();
+                //}
+                //d += p.Name;
+
+                //s.From.GetStructurizrObject().Uses((dynamic)s.To.GetStructurizrObject(), d, "", interactionStyle);
+
+
+
+                // TODO To add multiple arrows per interaction style, use a different description
+
+
+                Structurizr.Relationship r = s.From.GetStructurizrObject().Uses((dynamic)s.To.GetStructurizrObject(), p.Name, "", interactionStyle);
+                // returns null if the relationship already exists
+
+                if (r is null)
+                {
+                    // Check whether a synchronous relationship (solid line) hides an asynchronous relationship (dashed)
+                    var ers = s.From.GetStructurizrObject().GetEfferentRelationshipsWith(s.To.GetStructurizrObject());
+
+                    if (ers.Where(er => er.InteractionStyle != interactionStyle) is var ersis && ersis.Any())
+                        foreach (var ersi in ersis)
+                            logger.LogWarning($"A(n) {ersi.InteractionStyle} relationship is hiding a new {interactionStyle} relationship between '{s.From}' and '{s.To}' in the process '{ersi.Description}'.");
+
+                    continue;
+                }
+            }
+
+        }
+    }
 
     private static IEnumerable<Node> GetNodesInUse(IEnumerable<Process> ps)
     {
