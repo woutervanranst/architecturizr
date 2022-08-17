@@ -7,8 +7,12 @@ namespace architecturizr.OutputParser;
 
 internal class StructurizrBuilder
 {
+    private readonly ILogger logger;
+
     public StructurizrBuilder(ILogger<StructurizrBuilder> logger, string title, string description, IEnumerable<Node> nodes, IEnumerable<Process> processes, long workspaceId, string apiKey, string apiSecret)
     {
+        this.logger = logger;
+
         // Configure Workspace
         var workspace = new Structurizr.Workspace(title, description);
         var model = workspace.Model;
@@ -20,9 +24,8 @@ internal class StructurizrBuilder
         nodes = GetNodesInUse(processes).Distinct().ToArray();
         AddNodes(nodes, model);
 
-
         // Add Edges
-        AddEdges(logger, processes);
+        AddEdges(processes);
 
         // Add Views
         var viewSet = workspace.Views;
@@ -34,7 +37,7 @@ internal class StructurizrBuilder
             v.Title = $"[(1) System Context] {ss.Name}";
 
             v.AddAllElements();
-            v.EnableAutomaticLayout(Structurizr.RankDirection.TopBottom, 200, 200, 200, false);
+            v.EnableAutomaticLayout(Structurizr.RankDirection.TopBottom, 300, 300, 300, true);
         }
 
         foreach (var ss in nodes.OfType<SoftwareSystem>())
@@ -43,7 +46,7 @@ internal class StructurizrBuilder
             v.Title = $"[(2) Container] {ss.Name}";
 
             v.AddAllElements();
-            v.EnableAutomaticLayout(Structurizr.RankDirection.TopBottom, 200, 200, 200, false);
+            v.EnableAutomaticLayout(Structurizr.RankDirection.TopBottom, 300, 300, 300, true);
             // v.PaperSize = Structurizr.PaperSize.A0_Landscape;
         }
 
@@ -57,7 +60,7 @@ internal class StructurizrBuilder
             v.Title = $"[(3) Component ALL] {c.Name}";
 
             v.AddAllElements();
-            v.EnableAutomaticLayout(Structurizr.RankDirection.TopBottom, 200, 200, 200, false);
+            v.EnableAutomaticLayout(Structurizr.RankDirection.TopBottom, 300, 300, 300, false);
             // v.PaperSize = Structurizr.PaperSize.A0_Landscape;
         }
 
@@ -126,7 +129,7 @@ internal class StructurizrBuilder
 
         // https://github.com/structurizr/dotnet-core-quickstart/blob/master/structurizr/Program.cs
 
-        // https://structurizr.com/help/themes
+        // https://structurizr.com/help/themess
         // viewSet.Configuration.Theme = "default";
         var styles = viewSet.Configuration.Styles;
         styles.Add(new Structurizr.ElementStyle(Structurizr.Tags.SoftwareSystem) { Background = "#1168bd", Color = "#ffffff" });
@@ -145,61 +148,71 @@ internal class StructurizrBuilder
         structurizrClient.PutWorkspace(workspaceId, workspace);
     }
 
-    private static void AddEdges(ILogger<StructurizrBuilder> logger, IEnumerable<Process> processes)
+
+
+    
+
+    private void AddEdges(IEnumerable<Process> processes)
     {
-        foreach (var p in processes)
+        // Group all interactions between two nodes and the interaction type
+        var edges = processes
+            .SelectMany(p => p.Steps.Select(s => new { s.From, s.To, Step = s, Process = p }))
+            .GroupBy(e => (e.From, e.To, StepType: e.Step.GetType()));
+
+        foreach (var edge in edges)
         {
-            foreach (var s in p.Steps)
-            {
-                Structurizr.InteractionStyle interactionStyle;
-                if (s is AsyncStep)
-                    interactionStyle = Structurizr.InteractionStyle.Asynchronous;
-                else if (s is SyncStep)
-                    interactionStyle = Structurizr.InteractionStyle.Synchronous;
-                else
-                    throw new Exception();
+            var from = edge.Key.From.GetStructurizrObject();
+            dynamic to = edge.Key.To.GetStructurizrObject();
+            var d = string.Join('\n', edge.Select(e => e.Process.Name).Distinct());
+            var i = GetInteractionStyle(edge.Key.StepType);
 
-                //// Check if an interaction between From and To already exist with this interaction style
-                //var r0 = s.From.GetStructurizrObject().GetEfferentRelationshipsWith(s.To.GetStructurizrObject())
-                //    .Where(r => r.InteractionStyle == interactionStyle);
-                //var r = r0
-                //    .SingleOrDefault(); // there should be only one or zero
-
-                //// Construct the name of the interaction, concatenating all process names
-                //string d = string.Empty;
-                //if (r is not null)
-                //{
-                //    d = r.Description + "\n";
-                //    var rr = s.From.GetStructurizrObject().Relationships.Remove(r); // remove the existing relationship -- we cannot update the description
-                //    if (!rr)
-                //        throw new Exception();
-                //}
-                //d += p.Name;
-
-                //s.From.GetStructurizrObject().Uses((dynamic)s.To.GetStructurizrObject(), d, "", interactionStyle);
-
-
-
-                // TODO To add multiple arrows per interaction style, use a different description
-
-
-                Structurizr.Relationship r = s.From.GetStructurizrObject().Uses((dynamic)s.To.GetStructurizrObject(), p.Name, "", interactionStyle);
-                // returns null if the relationship already exists
-
-                if (r is null)
-                {
-                    // Check whether a synchronous relationship (solid line) hides an asynchronous relationship (dashed)
-                    var ers = s.From.GetStructurizrObject().GetEfferentRelationshipsWith(s.To.GetStructurizrObject());
-
-                    if (ers.Where(er => er.InteractionStyle != interactionStyle) is var ersis && ersis.Any())
-                        foreach (var ersi in ersis)
-                            logger.LogWarning($"A(n) {ersi.InteractionStyle} relationship is hiding a new {interactionStyle} relationship between '{s.From}' and '{s.To}' in the process '{ersi.Description}'.");
-
-                    continue;
-                }
-            }
+            Structurizr.Relationship r = from.Uses(to, d, "", i);
 
         }
+
+
+        //foreach (var p in processes)
+        //{
+        //    foreach (var s in p.Steps)
+        //    {
+                
+
+                
+        //        //// Construct the name of the interaction, concatenating all process names
+        //        //string d = string.Empty;
+        //        //if (r is not null)
+        //        //{
+        //        //    d = r.Description + "\n";
+        //        //    var rr = s.From.GetStructurizrObject().Relationships.Remove(r); // remove the existing relationship -- we cannot update the description
+        //        //    if (!rr)
+        //        //        throw new Exception();
+        //        //}
+        //        //d += p.Name;
+
+        //        //s.From.GetStructurizrObject().Uses((dynamic)s.To.GetStructurizrObject(), d, "", interactionStyle);
+
+
+
+        //        // TODO To add multiple arrows per interaction style, use a different description
+
+
+        //        Structurizr.Relationship r = s.From.GetStructurizrObject().Uses((dynamic)s.To.GetStructurizrObject(), p.Name, "", interactionStyle);
+        //        // returns null if the relationship already exists
+
+        //        if (r is null)
+        //        {
+        //            // Check whether a synchronous relationship (solid line) hides an asynchronous relationship (dashed)
+        //            var ers = s.From.GetStructurizrObject().GetEfferentRelationshipsWith(s.To.GetStructurizrObject());
+
+        //            if (ers.Where(er => er.InteractionStyle != interactionStyle) is var ersis && ersis.Any())
+        //                foreach (var ersi in ersis)
+        //                    logger.LogWarning($"A(n) {ersi.InteractionStyle} relationship is hiding a new {interactionStyle} relationship between '{s.From}' and '{s.To}' in the process '{ersi.Description}'.");
+
+        //            continue;
+        //        }
+        //    }
+
+        //}
     }
 
     private static IEnumerable<Node> GetNodesInUse(IEnumerable<Process> ps)
@@ -282,4 +295,22 @@ internal class StructurizrBuilder
         //}
     }
 
+    private static Structurizr.InteractionStyle GetInteractionStyle(Step s)
+    {
+        if (s is AsyncStep)
+            return Structurizr.InteractionStyle.Asynchronous;
+        else if (s is SyncStep)
+            return Structurizr.InteractionStyle.Synchronous;
+        else
+            throw new Exception();
+    }
+    private static Structurizr.InteractionStyle GetInteractionStyle(Type t)
+    {
+        if (t == typeof(AsyncStep))
+            return Structurizr.InteractionStyle.Asynchronous;
+        else if (t == typeof(SyncStep))
+            return Structurizr.InteractionStyle.Synchronous;
+        else
+            throw new Exception();
+    }
 }
