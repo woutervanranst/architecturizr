@@ -169,50 +169,6 @@ internal class StructurizrBuilder
             Structurizr.Relationship r = from.Uses(to, d, "", i);
 
         }
-
-
-        //foreach (var p in processes)
-        //{
-        //    foreach (var s in p.Steps)
-        //    {
-                
-
-                
-        //        //// Construct the name of the interaction, concatenating all process names
-        //        //string d = string.Empty;
-        //        //if (r is not null)
-        //        //{
-        //        //    d = r.Description + "\n";
-        //        //    var rr = s.From.GetStructurizrObject().Relationships.Remove(r); // remove the existing relationship -- we cannot update the description
-        //        //    if (!rr)
-        //        //        throw new Exception();
-        //        //}
-        //        //d += p.Name;
-
-        //        //s.From.GetStructurizrObject().Uses((dynamic)s.To.GetStructurizrObject(), d, "", interactionStyle);
-
-
-
-        //        // TODO To add multiple arrows per interaction style, use a different description
-
-
-        //        Structurizr.Relationship r = s.From.GetStructurizrObject().Uses((dynamic)s.To.GetStructurizrObject(), p.Name, "", interactionStyle);
-        //        // returns null if the relationship already exists
-
-        //        if (r is null)
-        //        {
-        //            // Check whether a synchronous relationship (solid line) hides an asynchronous relationship (dashed)
-        //            var ers = s.From.GetStructurizrObject().GetEfferentRelationshipsWith(s.To.GetStructurizrObject());
-
-        //            if (ers.Where(er => er.InteractionStyle != interactionStyle) is var ersis && ersis.Any())
-        //                foreach (var ersi in ersis)
-        //                    logger.LogWarning($"A(n) {ersi.InteractionStyle} relationship is hiding a new {interactionStyle} relationship between '{s.From}' and '{s.To}' in the process '{ersi.Description}'.");
-
-        //            continue;
-        //        }
-        //    }
-
-        //}
     }
 
     private static IEnumerable<Node> GetNodesInUse(IEnumerable<Process> ps)
