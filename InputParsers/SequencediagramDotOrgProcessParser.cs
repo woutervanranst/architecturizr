@@ -95,7 +95,7 @@ internal class SequencediagramDotOrgProcessParser : IINputParser<Process>
                 p.Steps.Add(s);
             }
             else
-                throw new Exception($"{line} is not valid");
+                throw new Exception($"{f.Name}: Line '{line}' cannot be parsed");
         }
 
         return p;
