@@ -64,6 +64,7 @@ internal class SequencediagramDotOrgProcessParser : IINputParser<Process>
             }
             else if (syncRegex.Match(line) is var r1 && r1.Success)
             {
+                // Sync step
                 var from = r1.Groups["from"].Value;
                 var to = r1.Groups["to"].Value;
                 var description = r1.Groups["description"].Value;
@@ -79,6 +80,7 @@ internal class SequencediagramDotOrgProcessParser : IINputParser<Process>
             }
             else if (asyncRegex.Match(line) is var r2 && r2.Success)
             {
+                // Async step
                 var from = r2.Groups["from"].Value;
                 var to = r2.Groups["to"].Value;
                 var topic = r2.Groups["topic"].Value;
