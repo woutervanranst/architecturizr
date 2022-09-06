@@ -64,11 +64,9 @@ try
     // var processes = new Process[]{ processParser.Parse(new FileInfo(@" / Users/wouter/Documents/GitLab/solution-architecture/microservice-dependencies/structurizr-c4/processes/s1.txt")) };
 
     // Build Structurizr Diagram
-
-
-    long workspaceId = 74785;
-    var apiKey = config["structurizr:apiKey"]; // see https://structurizr.com/workspace/74785/settings
-    var apiSecret = config["structurizr:apiSecret"];
+    long workspaceId = long.Parse(config["Structurizr:WorkspaceId"]);
+    var apiKey = config["Structurizr:ApiKey"]; // see https://structurizr.com/workspace/74785/settings
+    var apiSecret = config["Structurizr:ApiSecret"];
     var logger = services.GetRequiredService<ILogger<StructurizrBuilder>>();
 
     var b = new StructurizrBuilder(logger, title, description, nodes.Values, processes, workspaceId, apiKey, apiSecret);
