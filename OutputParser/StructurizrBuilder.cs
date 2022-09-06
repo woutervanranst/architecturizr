@@ -31,7 +31,7 @@ internal class StructurizrBuilder
         var viewSet = workspace.Views;
         viewSet.Configuration.ViewSortOrder = Structurizr.ViewSortOrder.Type;
 
-        foreach (var ss in nodes.OfType<SoftwareSystem>())
+        foreach (var ss in nodes.Where(n => n.Views.Contains(Views.SystemContextView)).Cast<SoftwareSystem>())
         {
             var v = viewSet.CreateSystemContextView(ss.GetStructurizrObject(), ss.Key, $"Helicopter view of '{ss.Name}'");
             v.Title = $"[(1) System Context] {ss.Name}";
@@ -39,8 +39,7 @@ internal class StructurizrBuilder
             v.AddAllElements();
             v.EnableAutomaticLayout(Structurizr.RankDirection.TopBottom, 300, 300, 300, true);
         }
-
-        foreach (var ss in nodes.OfType<SoftwareSystem>())
+        foreach (var ss in nodes.Where(n => n.Views.Contains(Views.ContainerView)).Cast<SoftwareSystem>())
         {
             var v = viewSet.CreateContainerView(ss.GetStructurizrObject(), "c" + ss.Key, $"Interactions with the insides of '{ss.Name}'");
             v.Title = $"[(2) Container] {ss.Name}";
@@ -49,30 +48,43 @@ internal class StructurizrBuilder
             v.EnableAutomaticLayout(Structurizr.RankDirection.TopBottom, 300, 300, 300, true);
             // v.PaperSize = Structurizr.PaperSize.A0_Landscape;
         }
-
-        foreach (var c in nodes.OfType<Container>())
+        foreach (var c in nodes.Where(n => n.Views.Contains(Views.ComponentView)))
         {
-            if (c.Children.Count == 0) // if this Container does not have any children (Components), the diagram will not show anything useful
-                continue;
+            if (c is Container cont)
+            {
+                if (cont.Children.Count == 0) // if this Container does not have any children (Components), the diagram will not show anything useful
+                    continue;
 
-            var v = viewSet.CreateComponentView(c.GetStructurizrObject(), c.Key, $"What is inside/interacts with {c.Name}");
+                var v = viewSet.CreateComponentView(cont.GetStructurizrObject(), cont.Key, $"What is inside/interacts with {cont.Name}");
 
-            v.Title = $"[(3) Component ALL] {c.Name}";
+                v.Title = $"[(3) Component ALL] {cont.Name}";
 
-            v.AddAllElements();
-            v.EnableAutomaticLayout(Structurizr.RankDirection.TopBottom, 300, 300, 300, false);
-            // v.PaperSize = Structurizr.PaperSize.A0_Landscape;
+                v.AddAllElements();
+                v.EnableAutomaticLayout(Structurizr.RankDirection.TopBottom, 300, 300, 300, false);
+            }
+            else if (c is Component comp)
+            {
+                var v = viewSet.CreateComponentView(comp.Parent.GetStructurizrObject(), "component-" + comp.Key, $"What interacts with {comp.Name}");
+                v.Title = $"[(3) Component DIRECT] {comp.Name}";
+
+                v.Add(comp.GetStructurizrObject());
+                v.AddNearestNeighbours(comp.GetStructurizrObject());
+
+                v.EnableAutomaticLayout();
+            }
+
         }
+
+        //foreach (var c in nodes.OfType<Container>())
+        //{
+
+
+        //    // v.PaperSize = Structurizr.PaperSize.A0_Landscape;
+        //}
 
         foreach (var c in nodes.OfType<Component>())
         {
-            var v = viewSet.CreateComponentView(c.Parent.GetStructurizrObject(), "component-" + c.Key, $"What interacts with {c.Name}");
-            v.Title = $"[(3) Component DIRECT] {c.Name}";
-
-            v.Add(c.GetStructurizrObject());
-            v.AddNearestNeighbours(c.GetStructurizrObject());
-
-            v.EnableAutomaticLayout();
+            
         }
 
         foreach (var p in processes)
@@ -114,7 +126,7 @@ internal class StructurizrBuilder
             }
 
 
-            v.EnableAutomaticLayout(Structurizr.RankDirection.LeftRight, 200, 200, 200, false);
+            v.EnableAutomaticLayout(Structurizr.RankDirection.TopBottom, 300, 300, 300, false);
         }
 
 

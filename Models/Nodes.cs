@@ -16,8 +16,10 @@ internal abstract class Node
 
     public string Owner { get; init; }
 
+    public List<string> Views { get; } = new();
+
     public abstract Structurizr.StaticStructureElement GetStructurizrObject();
-    
+
     public override string ToString() => $"{this.GetType().Name}-{Key}";
 }
 

@@ -58,20 +58,7 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
         //Components = nodes.Values.OfType<Component>().ToArray();
 
 
-        //// Parse Edges Tab
-        //var edgeRows = fileName.ExcelToEnumerable<EdgeRow>(
-        //    x => x.
-        //        UsingSheet("Edges")
-        //        .HeaderOnRow(2)
-        //        .StartingFromRow(3)
-        //        .OutputExceptionsTo(exceptionList)
-        //        .Property(x => x.Row).MapsToRowNumber()
-        //    );
-
-        //if (exceptionList.Any())
-        //    throw new Exception();
-
-        //Edges = ParseEdges(nodes, edgeRows);
+        
 
         return (title, description, nodes);
     }
@@ -167,6 +154,10 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
                 };
             }
 
+            // Parse Views
+            n.Views.AddRange(ParseViews((dynamic)n, row));
+
+
             if (n == null)
                 throw new InvalidOperationException($"Row #{row.Row} did not match any Node type");
             else if (nodes.ContainsKey(n.Key))
@@ -178,25 +169,46 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
         return nodes;
     }
 
-    //private IEnumerable<Edge> ParseEdges(IDictionary<string, Node> nodes, IEnumerable<EdgeRow> edgeRows)
-    //{
-    //    var edges = new List<Edge>();
+    private IEnumerable<string> ParseViews(Person o, NodeRow r)
+    {
+        if (!string.IsNullOrWhiteSpace(r.SystemContextView))
+            throw new NotImplementedException();
+        if (!string.IsNullOrWhiteSpace(r.ContainerView))
+            throw new NotImplementedException();
+        if (!string.IsNullOrWhiteSpace(r.ComponentView))
+            throw new NotImplementedException();
 
-    //    foreach (var row in edgeRows)
-    //    {
-    //        if (!nodes.ContainsKey(row.From))
-    //            throw new InvalidOperationException($"The 'From-node' {row.From} on row {row.Row} is not defined.");
-    //        if (!nodes.ContainsKey(row.To))
-    //            throw new InvalidOperationException($"The 'To-node' {row.To} on row {row.Row} is not defined.");
+        return Array.Empty<string>();
+    }
+    private IEnumerable<string> ParseViews(SoftwareSystem o, NodeRow r)
+    {
+        if (!string.IsNullOrWhiteSpace(r.SystemContextView))
+            yield return Views.SystemContextView;
+        if (!string.IsNullOrWhiteSpace(r.ContainerView))
+            yield return Views.ContainerView;
+            //throw new InvalidOperationException($"{o.GetType().Name} '{o.Key}' cannot have a ContainerView");
+        if (!string.IsNullOrWhiteSpace(r.ComponentView))
+            throw new InvalidOperationException($"{o.GetType().Name} '{o.Key}' cannot have a ComponentView");
+    }
+    private IEnumerable<string> ParseViews(Container c, NodeRow r)
+    {
+        if (!string.IsNullOrWhiteSpace(r.SystemContextView))
+            yield return Views.SystemContextView;
+        if (!string.IsNullOrWhiteSpace(r.ContainerView))
+            yield return Views.ContainerView;
+        if (!string.IsNullOrWhiteSpace(r.ComponentView)) //yes
+            yield return Views.ComponentView;
 
-    //        var fromNode = nodes[row.From];
-    //        var toNode = nodes[row.To];
-
-    //        edges.Add(new Edge(fromNode, toNode));
-    //    }
-
-    //    return edges;
-    //}
+    }
+    private IEnumerable<string> ParseViews(Component c, NodeRow r)
+    {
+        if (!string.IsNullOrWhiteSpace(r.SystemContextView))
+            yield return Views.SystemContextView;
+        if (!string.IsNullOrWhiteSpace(r.ContainerView))
+            yield return Views.ContainerView;
+        if (!string.IsNullOrWhiteSpace(r.ComponentView)) //yes
+            yield return Views.ComponentView;
+    }
 
     private class GeneralRow
     {
@@ -217,6 +229,10 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
         public string Owner { get; init; }
         public string Deprecated { get; init; }
         public string Description { get; init; }
+
+        public string SystemContextView { get; init; }
+        public string ContainerView { get; init; }
+        public string ComponentView { get; init; }
 
         internal bool IsPersonRow =>
             !string.IsNullOrWhiteSpace(PersonKey) &&
@@ -286,18 +302,4 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
         //    string.IsNullOrWhiteSpace(Deprecated) &&
         //    string.IsNullOrWhiteSpace(Description);
     }
-
-    //private class EdgeRow
-    //{
-    //    public int Row { get; init; }
-    //    public string From { get; init; }
-    //    public string To { get; init; }
-    //    public string A { get; init; }
-    //    public string B { get; init; }
-    //    public string E { get; init; }
-    //    public string F { get; init; }
-    //}
 }
-
-
-
