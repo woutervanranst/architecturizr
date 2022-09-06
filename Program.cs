@@ -21,7 +21,7 @@ var services = new ServiceCollection()
             builder.AddConsole();
         })
     .AddSingleton<ExcelNodeParser>()
-    .AddSingleton<SequencediagramDotOrgProcessParser>()
+    .AddSingleton<PlantUmlParser>()
     .BuildServiceProvider();
 
 // Parse Nodes
@@ -29,7 +29,7 @@ var nodeParser = services.GetRequiredService<ExcelNodeParser>();
 var (title, description, nodes) = nodeParser.Parse(new FileInfo("/Users/wouter/Documents/GitLab/solution-architecture/microservice-dependencies/structurizr-c4/source2.xlsx"));
 
 // Parse Processes
-var processParser = services.GetRequiredService<SequencediagramDotOrgProcessParser>();
+var processParser = services.GetRequiredService<PlantUmlParser>();
 processParser.SetNodes(nodes);
 
 var processesDirectory = new DirectoryInfo(@"/Users/wouter/Documents/GitLab/solution-architecture/microservice-dependencies/structurizr-c4/processes/");

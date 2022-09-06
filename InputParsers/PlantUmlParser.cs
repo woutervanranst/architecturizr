@@ -5,15 +5,15 @@ using Microsoft.Extensions.Logging;
 
 namespace architecturizr.InputParsers;
 
-internal class SequencediagramDotOrgProcessParser : IINputParser<Process>
+internal class PlantUmlParser : IINputParser<Process>
 {
-    public SequencediagramDotOrgProcessParser(ILogger<SequencediagramDotOrgProcessParser> logger)
+    public PlantUmlParser(ILogger<PlantUmlParser> logger)
     {
         this.logger = logger;
     }
 
     private IDictionary<string, Node> nodes;
-    private readonly ILogger<SequencediagramDotOrgProcessParser> logger;
+    private readonly ILogger<PlantUmlParser> logger;
 
     public void SetNodes(IDictionary<string, Node> nodes)
     {
