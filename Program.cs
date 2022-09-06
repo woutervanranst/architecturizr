@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Net;
+using System.Reflection;
 using architecturizr;
 using architecturizr.InputParsers;
 using architecturizr.Models;
@@ -7,44 +8,72 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
+FileInfo? nodeDefinitionsFile = null;
 
-// Set up on Mac & read in Console App
-//      https://makolyte.com/how-to-add-user-secrets-in-a-dotnetcore-console-app/
-//      https://dotnetcoretutorials.com/2022/04/28/using-user-secrets-configuration-in-net/
-// Add new secrets:
-//      https://developercommunity.visualstudio.com/t/manage-user-secrets/179886#T-N195679
+try
+{
+    // Initialize Secrets
+        // Set up on Mac & read in Console App
+        //      https://makolyte.com/how-to-add-user-secrets-in-a-dotnetcore-console-app/
+        //      https://dotnetcoretutorials.com/2022/04/28/using-user-secrets-configuration-in-net/
+        // Add new secrets:
+        //      https://developercommunity.visualstudio.com/t/manage-user-secrets/179886#T-N195679
+    var config = new ConfigurationBuilder()
+        .AddUserSecrets(Assembly.GetExecutingAssembly(), true)
+        .Build();
 
-
-var services = new ServiceCollection()
-    .AddLogging(builder =>
+    // Initialize Services
+    var services = new ServiceCollection()
+        .AddLogging(builder =>
         {
             builder.AddConsole();
         })
-    .AddSingleton<ExcelNodeParser>()
-    .AddSingleton<PlantUmlParser>()
-    .BuildServiceProvider();
+        .AddSingleton<ExcelNodeParser>()
+        .AddSingleton<PlantUmlParser>()
+        .BuildServiceProvider();
 
-// Parse Nodes
-var nodeParser = services.GetRequiredService<ExcelNodeParser>();
-var (title, description, nodes) = nodeParser.Parse(new FileInfo("/Users/wouter/Documents/GitLab/solution-architecture/microservice-dependencies/structurizr-c4/source2.xlsx"));
+    // Get Nodes Definition file
+    var nodeDefinitionsUrl = config["NodeDefinition:Url"];
+    try
+    {
+        using (var client = new HttpClient())
+        {
+            using var s = await client.GetStreamAsync(nodeDefinitionsUrl);
 
-// Parse Processes
-var processParser = services.GetRequiredService<PlantUmlParser>();
-processParser.SetNodes(nodes);
+            nodeDefinitionsFile = new FileInfo(Path.GetTempFileName());
+            using var fs = nodeDefinitionsFile.Create();
+            await s.CopyToAsync(fs);
+        }
+    }
+    catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.Unauthorized)
+    {
+        throw new Exception($"Cannot access the Nodes Definition File at {nodeDefinitionsUrl}");
+    }
+    
+    // Parse Nodes
+    var nodeParser = services.GetRequiredService<ExcelNodeParser>();
+    var (title, description, nodes) = nodeParser.Parse(nodeDefinitionsFile);
 
-var processesDirectory = new DirectoryInfo(@"/Users/wouter/Documents/GitLab/solution-architecture/microservice-dependencies/structurizr-c4/processes/");
-var processes = processesDirectory.GetFiles().Select(fi => processParser.Parse(fi));
+    // Parse Processes
+    var processParser = services.GetRequiredService<PlantUmlParser>();
+    processParser.SetNodes(nodes);
 
-// var processes = new Process[]{ processParser.Parse(new FileInfo(@" / Users/wouter/Documents/GitLab/solution-architecture/microservice-dependencies/structurizr-c4/processes/s1.txt")) };
+    var processesDirectory = new DirectoryInfo(@"/Users/wouter/Documents/GitLab/solution-architecture/microservice-dependencies/structurizr-c4/processes/");
+    var processes = processesDirectory.GetFiles().Select(fi => processParser.Parse(fi));
 
-// Build Structurizr Diagram
-var config = new ConfigurationBuilder()
-    .AddUserSecrets(Assembly.GetExecutingAssembly(), true)
-    .Build();
+    // var processes = new Process[]{ processParser.Parse(new FileInfo(@" / Users/wouter/Documents/GitLab/solution-architecture/microservice-dependencies/structurizr-c4/processes/s1.txt")) };
 
-long workspaceId = 74785;
-var apiKey = config["structurizr:apiKey"]; // see https://structurizr.com/workspace/74785/settings
-var apiSecret = config["structurizr:apiSecret"];
-var logger = services.GetRequiredService<ILogger<StructurizrBuilder>>();
+    // Build Structurizr Diagram
 
-var b = new StructurizrBuilder(logger, title, description, nodes.Values, processes, workspaceId, apiKey, apiSecret);
+
+    long workspaceId = 74785;
+    var apiKey = config["structurizr:apiKey"]; // see https://structurizr.com/workspace/74785/settings
+    var apiSecret = config["structurizr:apiSecret"];
+    var logger = services.GetRequiredService<ILogger<StructurizrBuilder>>();
+
+    var b = new StructurizrBuilder(logger, title, description, nodes.Values, processes, workspaceId, apiKey, apiSecret);
+}
+finally
+{
+    nodeDefinitionsFile?.Delete();
+}
