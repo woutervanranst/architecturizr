@@ -29,23 +29,7 @@ public static class StringExtensions
     public static string Value(this string? s)
     {
         ArgumentNullException.ThrowIfNull(s, nameof(s));
-
-        //var r = (string)s;
-        //if (r is null)
-        //    throw new ArgumentException("Value cannot be null or whitespace.", nameof(s));
-
+        
         return s;
     }
-
-    //public static FileSystemInfo GetFileType(this string path)
-    //{
-    //    // Check whether the given path exists (throws FileNotFoundException) and is a File or Directory
-    //    FileSystemInfo r = File.GetAttributes(path).HasFlag(FileAttributes.Directory)
-    //        ? // as per https://stackoverflow.com/a/1395226/1582323
-    //        new DirectoryInfo(path)
-    //        : new FileInfo(path);
-
-    //    if (r is DirectoryInfo)
-    //        return r;
-    //}
 }

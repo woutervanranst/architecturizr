@@ -86,13 +86,6 @@ internal class StructurizrBuilder
 
         }
 
-        //foreach (var c in nodes.OfType<Container>())
-        //{
-
-
-        //    // v.PaperSize = Structurizr.PaperSize.A0_Landscape;
-        //}
-
         foreach (var p in processes)
         {
             //var c = ((SoftwareSystem)nodes.Where(n => n.Key == "ivs-be").Single()).StructurizrObject;
@@ -243,30 +236,7 @@ internal class StructurizrBuilder
         {
             if (!string.IsNullOrWhiteSpace(n.Owner))
                 n.GetStructurizrObject().AddTags("IVS");
-                //((dynamic)n).GetStructurizrObject().AddTags("IVS");
         }
-
-        // THIS IS THE OLD CODE THAT ADDS ALL COMPONENTS REGARDLESS OF BEING USED
-        //foreach (var softwareSystem in nodes.OfType<SoftwareSystem>())
-        //{
-        //    softwareSystem.StructurizrObject = model.AddSoftwareSystem(softwareSystem.Name, softwareSystem.Description);
-
-        //    foreach (var container in softwareSystem.Children)
-        //    {
-        //        container.StructurizrObject = softwareSystem.StructurizrObject.AddContainer(container.Name, container.Description, container.Technology);
-
-        //        foreach (var component in container.Children)
-        //        {
-        //            var c = container.StructurizrObject.AddComponent(component.Name, component.Description, component.Technology);
-
-        //            c.AddTags(c.Technology);
-        //            if (!string.IsNullOrWhiteSpace(component.Owner))
-        //                c.AddTags("IVS");
-
-        //            component.StructurizrObject = c;
-        //        }
-        //    }
-        //}
     }
 
     private static Structurizr.InteractionStyle GetInteractionStyle(Step s)
