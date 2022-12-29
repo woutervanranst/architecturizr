@@ -159,8 +159,8 @@ internal class StructurizrBuilder
 
         styles.Add(new Structurizr.ElementStyle("IVS") { Background = "#e7285d" });
 
-        styles.Add(new Structurizr.RelationshipStyle(Structurizr.Tags.Synchronous) { Dashed = false });
-        styles.Add(new Structurizr.RelationshipStyle(Structurizr.Tags.Asynchronous) { Dashed = true });
+        styles.Add(new Structurizr.RelationshipStyle(Structurizr.Tags.Synchronous) { Dashed = false, FontSize = 18, Width = 400 }); // See Relationships: https://structurizr.com/help/notation
+        styles.Add(new Structurizr.RelationshipStyle(Structurizr.Tags.Asynchronous) { Dashed = true, FontSize = 18, Width = 400 });
 
         client.PutWorkspace(workspaceId, workspace);
     }
