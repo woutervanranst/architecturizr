@@ -96,7 +96,7 @@ internal class StructurizrBuilder
         foreach (var p in processes)
         {
             //var c = ((SoftwareSystem)nodes.Where(n => n.Key == "ivs-be").Single()).StructurizrObject;
-            var c = ((Container)nodes.Where(n => n.Key == "k8s").Single()).GetStructurizrObject();
+            var c = ((Container)nodes.Single(n => n.Key == "k8s")).GetStructurizrObject();
             var v = viewSet.CreateDynamicView(c, $"process-{p.Name.ToKebabCase()}", p.Name);
             v.Title = p.Name;
 
