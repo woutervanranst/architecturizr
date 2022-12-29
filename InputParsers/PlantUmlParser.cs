@@ -72,7 +72,7 @@ internal partial class PlantUmlParser : IINputParser<Process>
             {
                 // Participant -- ignore
             }
-            else if (SyncStepRegex().Match(line) is var r1 && r1.Success)
+            else if (SyncStepRegex().Match(line) is { Success: true } r1)
             {
                 // Sync step
                 var from = r1.Groups["from"].Value;
@@ -88,7 +88,7 @@ internal partial class PlantUmlParser : IINputParser<Process>
 
                 p.Steps.Add(s);
             }
-            else if (AsyncStepRegex().Match(line) is var r2 && r2.Success)
+            else if (AsyncStepRegex().Match(line) is { Success: true } r2)
             {
                 // Async step
                 var from = r2.Groups["from"].Value;
