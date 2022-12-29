@@ -17,17 +17,18 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
         this.logger = logger;
     }
 
-    public (string title, string description, IDictionary<string, Node>) Parse(FileInfo fi)
+    public (string title, string description, IDictionary<string, Node>) Parse(FileInfo excel)
     {
         var exceptionList = new List<Exception>();
 
         // Parse General Tab
-        var generalRows = fi.FullName.ExcelToEnumerable<GeneralRow>(
+        using var fs1 = excel.OpenRead();
+        var generalRows = fs1.ExcelToEnumerable<GeneralRow>(
             x => x
                 .UsingSheet("General")
                 .UsingHeaderNames(false) //map using column numbers, not names
                 .OutputExceptionsTo(exceptionList)
-            );
+            ).ToArray();
 
         if (exceptionList.Any())
             throw new Exception();
@@ -37,7 +38,8 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
 
 
         // Parse Nodes Tab
-        var nodeRows = fi.FullName.ExcelToEnumerable<NodeRow>(
+        using var fs2 = excel.OpenRead();
+        var nodeRows = fs2.ExcelToEnumerable<NodeRow>(
             x => x
                 .UsingSheet("Nodes")
                 .OutputExceptionsTo(exceptionList)
@@ -58,7 +60,7 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
         //Components = nodes.Values.OfType<Component>().ToArray();
 
 
-        
+
 
         return (title, description, nodes);
     }

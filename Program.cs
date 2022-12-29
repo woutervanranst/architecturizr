@@ -52,15 +52,13 @@ static async Task<(string title, string description, IDictionary<string, Node> n
     try
     {
         // Get Nodes Definition file
-        using (var client = new HttpClient())
-        {
-            using var s = await client.GetStreamAsync(nodeDefinitionsUrl);
-            nodeDefinitionsFile = new FileInfo(Path.GetTempFileName());
-            using var fs = nodeDefinitionsFile.Create();
-            await s.CopyToAsync(fs);
-            fs.Close();
-            s.Close();
-        }
+        using var client = new HttpClient();
+        await using var s = await client.GetStreamAsync(nodeDefinitionsUrl);
+        nodeDefinitionsFile = new FileInfo(Path.GetTempFileName());
+        await using var fs = nodeDefinitionsFile.Create();
+        await s.CopyToAsync(fs);
+        fs.Close();
+        s.Close();
 
         // Parse Nodes
         var nodeParser = serviceProvider.GetRequiredService<ExcelNodeParser>();
