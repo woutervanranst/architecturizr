@@ -82,11 +82,6 @@ internal class StructurizrBuilder
         //    // v.PaperSize = Structurizr.PaperSize.A0_Landscape;
         //}
 
-        foreach (var c in nodes.OfType<Component>())
-        {
-            
-        }
-
         foreach (var p in processes)
         {
             //var c = ((SoftwareSystem)nodes.Where(n => n.Key == "ivs-be").Single()).StructurizrObject;

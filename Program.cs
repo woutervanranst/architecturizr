@@ -59,7 +59,9 @@ try
     processParser.SetNodes(nodes);
 
     var processesDirectory = new DirectoryInfo(@"/Users/wouter/Documents/GitLab/solution-architecture/microservice-dependencies/structurizr-c4/processes/");
-    var processes = processesDirectory.GetFiles().Select(fi => processParser.Parse(fi));
+    var processes = processesDirectory.GetFiles()
+        .Where(fi => fi.Name == "Instrument Universe Load.txt")
+        .Select(fi => processParser.Parse(fi));
 
     // var processes = new Process[]{ processParser.Parse(new FileInfo(@" / Users/wouter/Documents/GitLab/solution-architecture/microservice-dependencies/structurizr-c4/processes/s1.txt")) };
 
