@@ -11,14 +11,14 @@ internal class Process
 
 internal abstract class Step
 {
-    public Node From { get; init; }
-    public Node To { get; init; }
-    public string Description { get; init; }
+    public required Node From { get; init; }
+    public required Node To { get; init; }
+    public required string Description { get; init; }
 }
 
 internal class AsyncStep : Step
 {
-    public string Topic { get; init; }
+    public required string Topic { get; init; }
 
     public override string ToString() => $"AsyncStep: {From.Name} -> {To.Name} on {Topic}";
 }
