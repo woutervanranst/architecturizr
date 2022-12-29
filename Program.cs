@@ -31,19 +31,20 @@ var services = new ServiceCollection()
     .BuildServiceProvider();
 
 // Get Nodes
-var (title, description, nodes) = await GetNodesAsync(config["NodeDefinition:Url"], services);
+var (title, description, nodes) = await GetNodesAsync(config["NodeDefinition:Url"].Value(), services);
 
 // Parse GetProcesses
 var processesDirectory = new DirectoryInfo(args[0]);
 var processes = GetProcesses(services, nodes, processesDirectory);
 
 // Build Structurizr Diagram
-var workspaceId = long.Parse(config["Structurizr:WorkspaceId"]);
+var workspaceId = long.Parse(config["Structurizr:WorkspaceId"].Value());
 var apiKey = config["Structurizr:ApiKey"].Value(); // see https://structurizr.com/workspace/74785/settings
 var apiSecret = config["Structurizr:ApiSecret"].Value();
 var logger = services.GetRequiredService<ILogger<StructurizrBuilder>>();
 
-var sb = new StructurizrBuilder(logger, title, description, nodes.Values, processes, workspaceId, apiKey, apiSecret);
+var sb = new StructurizrBuilder(logger, title, description, processes, workspaceId, apiKey, apiSecret);
+sb.CreateWorkspace();
 
 
 static async Task<(string title, string description, IDictionary<string, Node> nodes)> GetNodesAsync(string nodeDefinitionsUrl, IServiceProvider serviceProvider)

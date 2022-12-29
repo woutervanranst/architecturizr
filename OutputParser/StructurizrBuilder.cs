@@ -7,21 +7,32 @@ namespace architecturizr.OutputParser;
 
 internal class StructurizrBuilder
 {
-    private readonly ILogger logger;
-
-    public StructurizrBuilder(ILogger<StructurizrBuilder> logger, string title, string description, IEnumerable<Node> nodes, IEnumerable<Process> processes, long workspaceId, string apiKey, string apiSecret)
+    public StructurizrBuilder(ILogger<StructurizrBuilder> logger, string title, string description, 
+        IEnumerable<Process> processes, long workspaceId, string apiKey, string apiSecret)
     {
-        this.logger = logger;
+        client = new StructurizrClient(apiKey, apiSecret);
+        workspace = new Structurizr.Workspace(title, description);
 
+        this.logger = logger;
+        this.processes = processes;
+        this.workspaceId = workspaceId;
+    }
+
+    private readonly StructurizrClient client;
+    private readonly Structurizr.Workspace workspace;
+    private readonly ILogger logger;
+    private readonly IEnumerable<Process> processes;
+    private readonly long workspaceId;
+
+    public void CreateWorkspace()
+    {
         // Configure Workspace
-        var workspace = new Structurizr.Workspace(title, description);
         var model = workspace.Model;
 
         model.ImpliedRelationshipsStrategy = new Structurizr.CreateImpliedRelationshipsUnlessSameRelationshipExistsStrategy(); //.CreateImpliedRelationshipsUnlessAnyRelationshipExistsStrategy(); // ! IMPORTANT, see https://github.com/structurizr/dotnet/issues/97
 
-
         // Add Nodes
-        nodes = GetNodesInUse(processes).Distinct().ToArray();
+        var nodes = GetNodesInUse(processes).Distinct().ToArray();
         AddNodes(nodes, model);
 
         // Add Edges
@@ -151,8 +162,7 @@ internal class StructurizrBuilder
         styles.Add(new Structurizr.RelationshipStyle(Structurizr.Tags.Synchronous) { Dashed = false });
         styles.Add(new Structurizr.RelationshipStyle(Structurizr.Tags.Asynchronous) { Dashed = true });
 
-        var structurizrClient = new StructurizrClient(apiKey, apiSecret);
-        structurizrClient.PutWorkspace(workspaceId, workspace);
+        client.PutWorkspace(workspaceId, workspace);
     }
 
 
