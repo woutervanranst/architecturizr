@@ -26,6 +26,17 @@ public static class StringExtensions
         return value.ToLower();
     }
 
+    public static string Value(this string? s)
+    {
+        ArgumentNullException.ThrowIfNull(s, nameof(s));
+
+        //var r = (string)s;
+        //if (r is null)
+        //    throw new ArgumentException("Value cannot be null or whitespace.", nameof(s));
+
+        return s;
+    }
+
     //public static FileSystemInfo GetFileType(this string path)
     //{
     //    // Check whether the given path exists (throws FileNotFoundException) and is a File or Directory

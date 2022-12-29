@@ -2,6 +2,7 @@
 using architecturizr.InputParsers;
 using architecturizr.Models;
 using architecturizr.OutputParser;
+using architecturizr.Utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -38,11 +39,11 @@ var processes = GetProcesses(services, nodes, processesDirectory);
 
 // Build Structurizr Diagram
 var workspaceId = long.Parse(config["Structurizr:WorkspaceId"]);
-var apiKey = config["Structurizr:ApiKey"]; // see https://structurizr.com/workspace/74785/settings
-var apiSecret = config["Structurizr:ApiSecret"];
+var apiKey = config["Structurizr:ApiKey"].Value(); // see https://structurizr.com/workspace/74785/settings
+var apiSecret = config["Structurizr:ApiSecret"].Value();
 var logger = services.GetRequiredService<ILogger<StructurizrBuilder>>();
 
-var b = new StructurizrBuilder(logger, title, description, nodes.Values, processes, workspaceId, apiKey, apiSecret);
+var sb = new StructurizrBuilder(logger, title, description, nodes.Values, processes, workspaceId, apiKey, apiSecret);
 
 
 static async Task<(string title, string description, IDictionary<string, Node> nodes)> GetNodesAsync(string nodeDefinitionsUrl, IServiceProvider serviceProvider)
