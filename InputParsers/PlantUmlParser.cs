@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace architecturizr.InputParsers;
 
-internal class PlantUmlParser : IINputParser<Process>
+internal partial class PlantUmlParser : IINputParser<Process>
 {
     public PlantUmlParser(ILogger<PlantUmlParser> logger)
     {
@@ -22,6 +22,13 @@ internal class PlantUmlParser : IINputParser<Process>
 
         this.nodes = nodes;
     }
+
+    [GeneratedRegex("(?<=title )(?<processName>.*)")]
+    private static partial Regex TitleRegex();
+    [GeneratedRegex(@"(?<from>[\w-]*) ?-> ?(?<to>[\w-]*) ?: ?\ ?(?<description>.*)")]
+    private static partial Regex SyncStepRegex();
+    [GeneratedRegex(@"(?<from>[\w-]*) [-]?->\([0-9]\) (?<to>[\w-]*) ?: ?\[(?<topic>[\w-]*)\] ?(?<description>.*)"]
+    private static partial Regex AsyncStepRegex();
 
     public Process Parse(FileInfo f)
     {
@@ -41,17 +48,11 @@ internal class PlantUmlParser : IINputParser<Process>
 
         var p = new Process();
 
-        var titleRegex = new Regex(@"(?<=title )(?<processName>.*)");
-        var syncRegex = new Regex(@"(?<from>[\w-]*) ?-> ?(?<to>[\w-]*) ?: ?\ ?(?<description>.*)");
-        var asyncRegex = new Regex(@"(?<from>[\w-]*) [-]?->\([0-9]\) (?<to>[\w-]*) ?: ?\[(?<topic>[\w-]*)\] ?(?<description>.*)");
-
-
         foreach (var line in lines)
         {
-            var z = titleRegex.Match(line);
-
-            if (titleRegex.Match(line) is var r0 && r0.Success)
+            if (TitleRegex().Match(line) is var r0 && r0.Success)
             {
+                // Title
                 p.Name = r0.Value;
             }
             else if (line.StartsWith("#"))
@@ -60,9 +61,9 @@ internal class PlantUmlParser : IINputParser<Process>
             }
             else if (line.StartsWith("note"))
             {
-                // Note
+                // Note -- ignore
             }
-            else if (syncRegex.Match(line) is var r1 && r1.Success)
+            else if (SyncStepRegex().Match(line) is var r1 && r1.Success)
             {
                 // Sync step
                 var from = r1.Groups["from"].Value;
@@ -78,7 +79,7 @@ internal class PlantUmlParser : IINputParser<Process>
 
                 p.Steps.Add(s);
             }
-            else if (asyncRegex.Match(line) is var r2 && r2.Success)
+            else if (AsyncStepRegex().Match(line) is var r2 && r2.Success)
             {
                 // Async step
                 var from = r2.Groups["from"].Value;
