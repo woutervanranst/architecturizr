@@ -180,29 +180,30 @@ internal class StructurizrBuilder
 
     private static IEnumerable<Node> GetNodesInUse(IEnumerable<Process> ps)
     {
-        foreach (var n in ps.SelectMany(p => p.Steps).SelectMany(s => new Node[] { s.From, s.To }))
+        foreach (var n in ps
+                     .SelectMany(p => p.Steps)
+                     .SelectMany(s => new Node[] { s.From, s.To }))
         {
             yield return n;
 
-            if (n is Person)
+            switch (n)
             {
-                // No Parent
+                case Person:
+                    // No Parent
+                    break;
+                case SoftwareSystem:
+                    // No Parent
+                    break;
+                case Container cont:
+                    yield return cont.Parent;
+                    break;
+                case Component comp:
+                    yield return comp.Parent;
+                    yield return comp.Parent.Parent;
+                    break;
+                default:
+                    throw new Exception();
             }
-            else if (n is SoftwareSystem)
-            {
-                // No Parent
-            }
-            else if (n is Container cont)
-            {
-                yield return cont.Parent;
-            }
-            else if (n is Component comp)
-            {
-                yield return comp.Parent;
-                yield return comp.Parent.Parent;
-            }
-            else
-                throw new Exception();
         }
     }
 
