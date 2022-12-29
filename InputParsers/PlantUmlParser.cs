@@ -27,14 +27,14 @@ internal partial class PlantUmlParser : IINputParser<Process>
     private static partial Regex TitleRegex();
     [GeneratedRegex(@"(?<from>[\w-]*) ?-> ?(?<to>[\w-]*) ?: ?\ ?(?<description>.*)")]
     private static partial Regex SyncStepRegex();
-    [GeneratedRegex(@"(?<from>[\w-]*) [-]?->\([0-9]\) (?<to>[\w-]*) ?: ?\[(?<topic>[\w-]*)\] ?(?<description>.*)"]
+    [GeneratedRegex(@"(?<from>[\w-]*) [-]?->\([0-9]\) (?<to>[\w-]*) ?: ?\[(?<topic>[\w-]*)\] ?(?<description>.*)")]
     private static partial Regex AsyncStepRegex();
 
     public Process Parse(FileInfo f)
     {
-        var lines = File.ReadAllLines(f.FullName)
-            .Where(l => !string.IsNullOrWhiteSpace(l)) // remove empty lines from the file
-            .ToArray();
+        var lines = File.ReadAllLines(f.FullName);
+            //.Where(l => !string.IsNullOrWhiteSpace(l)) // remove empty lines from the file
+            //.ToArray();
 
         /*
          * multiline tryout
@@ -48,20 +48,29 @@ internal partial class PlantUmlParser : IINputParser<Process>
 
         var p = new Process();
 
-        foreach (var line in lines)
+        for (var i = 0; i < lines.Length; i++)
         {
+            var line = lines[i];
+
+            if (string.IsNullOrWhiteSpace(line))
+                continue;
+            
             if (TitleRegex().Match(line) is var r0 && r0.Success)
             {
                 // Title
                 p.Name = r0.Value;
             }
-            else if (line.StartsWith("#"))
+            else if (line.StartsWith("#") || line.StartsWith("'"))
             {
-                // Comment line
+                // Comment line -- ignore
             }
             else if (line.StartsWith("note"))
             {
                 // Note -- ignore
+            }
+            else if (line.StartsWith(("participant ")))
+            {
+                // Participant -- ignore
             }
             else if (SyncStepRegex().Match(line) is var r1 && r1.Success)
             {
@@ -98,7 +107,7 @@ internal partial class PlantUmlParser : IINputParser<Process>
                 p.Steps.Add(s);
             }
             else
-                throw new Exception($"{f.Name}: Line '{line}' cannot be parsed");
+                throw new Exception($"{f.Name}: Error on line {i}: '{line}' cannot be parsed");
         }
 
         return p;
