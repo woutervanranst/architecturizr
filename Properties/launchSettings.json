@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "architecturizr": {
+      "commandName": "Project",
+      "commandLineArgs": "C:\\Users\\woute\\Documents\\GitHub\\solution-architecture\\solution-architecture\\structurizr-c4\\processes"
+    }
+  }
+}

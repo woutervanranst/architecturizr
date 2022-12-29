@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Text.RegularExpressions;
 
 namespace architecturizr.Utils;
@@ -24,5 +25,16 @@ public static class StringExtensions
         // Lowercase and return
         return value.ToLower();
     }
-}
 
+    //public static FileSystemInfo GetFileType(this string path)
+    //{
+    //    // Check whether the given path exists (throws FileNotFoundException) and is a File or Directory
+    //    FileSystemInfo r = File.GetAttributes(path).HasFlag(FileAttributes.Directory)
+    //        ? // as per https://stackoverflow.com/a/1395226/1582323
+    //        new DirectoryInfo(path)
+    //        : new FileInfo(path);
+
+    //    if (r is DirectoryInfo)
+    //        return r;
+    //}
+}

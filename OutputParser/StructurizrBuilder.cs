@@ -159,7 +159,7 @@ internal class StructurizrBuilder
 
     
 
-    private void AddEdges(IEnumerable<Process> processes)
+    private static void AddEdges(IEnumerable<Process> processes)
     {
         // Group all interactions between two nodes and the interaction type
         var edges = processes
