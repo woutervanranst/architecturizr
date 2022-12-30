@@ -101,7 +101,8 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
                 n = new Person(row.PersonKey)
                 {
                     Name = row.Name,
-                    Description = row.Description
+                    Description = row.Description,
+                    Technology = row.Technology
                 };
             }
             if (row.IsSoftwareSystemRow)
@@ -114,6 +115,7 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
                 {
                     Name = row.Name,
                     Description = row.Description,
+                    Technology = row.Technology,
                     Owner = row.Owner
                 };
             }
