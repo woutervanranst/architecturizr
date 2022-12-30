@@ -28,160 +28,41 @@ internal class StructurizrBuilder
 
     public void CreateWorkspace()
     {
-        // Configure Workspace
-        var model = workspace.Model;
+        /* Original source
+         * https://github.com/structurizr/dotnet-core-quickstart/blob/master/structurizr/Program.cs
+         *
+         * Inspiration: Microservice
+         * https://structurizr.com/share/4241/diagrams#Containers
+         * https://github.com/structurizr/dsl/tree/master/docs/cookbook/workspace-extension
+         * https://structurizr.com/help/usage-recommendations
+         *
+         * Sequence Diagrams?
+         * https://github.com/structurizr/java/pull/129/files#diff-b55fd8523c23d8ff04163446b3ffc28e4f93238660847d4394926df9398f7a53
+         */
+        
 
-        model.ImpliedRelationshipsStrategy = new Structurizr.CreateImpliedRelationshipsUnlessSameRelationshipExistsStrategy(); //.CreateImpliedRelationshipsUnlessAnyRelationshipExistsStrategy(); // ! IMPORTANT, see https://github.com/structurizr/dotnet/issues/97
+        // Configure Relationship Creation Strategy
+        workspace.Model.ImpliedRelationshipsStrategy = new Structurizr.CreateImpliedRelationshipsUnlessSameRelationshipExistsStrategy(); //.CreateImpliedRelationshipsUnlessAnyRelationshipExistsStrategy(); // ! IMPORTANT, see https://github.com/structurizr/dotnet/issues/97
 
         // Add Nodes
         var nodes = GetNodesInUse(processes).Distinct().ToArray();
-        AddNodes(nodes, model);
+        AddNodes(workspace.Model, nodes);
 
         // Add Edges
         AddEdges(processes);
 
         // Add Views
-        var viewSet = workspace.Views;
-        viewSet.Configuration.ViewSortOrder = Structurizr.ViewSortOrder.Type;
+        AddViews(workspace.Views, nodes);
 
-        foreach (var ss in nodes.Where(n => n.Views.Contains(Views.SystemContextView)).Cast<SoftwareSystem>())
-        {
-            var v = viewSet.CreateSystemContextView(ss.GetStructurizrObject(), ss.Key, $"Helicopter view of '{ss.Name}'");
-            v.Title = $"[(1) System Context] {ss.Name}";
+        // Add Processes
+        AddProcesses(logger, workspace.Views, nodes, processes);
 
-            v.AddAllElements();
-            v.EnableAutomaticLayout(Structurizr.RankDirection.TopBottom, 300, 300, 300, true);
-        }
-        foreach (var ss in nodes.Where(n => n.Views.Contains(Views.ContainerView)).Cast<SoftwareSystem>())
-        {
-            var v = viewSet.CreateContainerView(ss.GetStructurizrObject(), "c" + ss.Key, $"Interactions with the insides of '{ss.Name}'");
-            v.Title = $"[(2) Container] {ss.Name}";
-
-            v.AddAllElements();
-            v.EnableAutomaticLayout(Structurizr.RankDirection.TopBottom, 300, 300, 300, true);
-            // v.PaperSize = Structurizr.PaperSize.A0_Landscape;
-        }
-        foreach (var c in nodes.Where(n => n.Views.Contains(Views.ComponentView)))
-        {
-            if (c is Container cont)
-            {
-                if (cont.Children.Count == 0) // if this Container does not have any children (Components), the diagram will not show anything useful
-                    continue;
-
-                var v = viewSet.CreateComponentView(cont.GetStructurizrObject(), cont.Key, $"What is inside/interacts with {cont.Name}");
-
-                v.Title = $"[(3) Component ALL] {cont.Name}";
-
-                v.AddAllElements();
-                v.EnableAutomaticLayout(Structurizr.RankDirection.TopBottom, 300, 300, 300, false);
-            }
-            else if (c is Component comp)
-            {
-                var v = viewSet.CreateComponentView(comp.Parent.GetStructurizrObject(), "component-" + comp.Key, $"What interacts with {comp.Name}");
-                v.Title = $"[(3) Component DIRECT] {comp.Name}";
-
-                v.Add(comp.GetStructurizrObject());
-                v.AddNearestNeighbours(comp.GetStructurizrObject());
-
-                v.EnableAutomaticLayout();
-            }
-
-        }
-
-        foreach (var p in processes)
-        {
-            var c = ((Container)nodes.Single(n => n.Key == "k8s")).GetStructurizrObject();
-            var v = viewSet.CreateDynamicView(c, $"process-{p.Name.ToKebabCase()}", p.Name);
-            v.Title = p.Name;
-
-            foreach (var s in p.Steps)
-            {
-                string d;
-                Structurizr.InteractionStyle interactionStyle;
-                if (s is AsyncStep ss)
-                {
-                    d = $"{s.Description}\n[{ss.Topic}]";
-                    interactionStyle = Structurizr.InteractionStyle.Asynchronous;
-                }
-                else if (s is SyncStep)
-                {
-                    d = s.Description;
-                    interactionStyle = Structurizr.InteractionStyle.Synchronous;
-
-                    if (string.IsNullOrWhiteSpace(s.Description))
-                        logger.LogWarning($"Process '{p.Name}': Description of step '{s}' is empty - may show erroneously on diagram");
-                }
-                else
-                    throw new Exception();
-
-                // NOTE: v.Add() Only adds the first relationship to the diagram.
-                // Element.GetEfferentRelationshipWith only yields the first relationship.
-                var r = v.Add(s.From.GetStructurizrObject(), d, s.To.GetStructurizrObject());
-                r.Relationship.InteractionStyle = interactionStyle;
-            }
-
-            v.EnableAutomaticLayout(Structurizr.RankDirection.TopBottom, 300, 300, 300, false);
-        }
-
-
-        /* Microservice
-         * 
-         *  https://structurizr.com/share/4241/diagrams#Containers
-         *  https://github.com/structurizr/dsl/tree/master/docs/cookbook/workspace-extension
-         *  https://structurizr.com/help/usage-recommendations
-         */
-
-        // Sequence Diagrams? https://github.com/structurizr/java/pull/129/files#diff-b55fd8523c23d8ff04163446b3ffc28e4f93238660847d4394926df9398f7a53
-
-        // https://github.com/structurizr/dotnet-core-quickstart/blob/master/structurizr/Program.cs
-
-        // https://structurizr.com/help/themes
-        // viewSet.Configuration.Theme = "default";
-        var styles = viewSet.Configuration.Styles;
-        styles.Add(new Structurizr.ElementStyle(Structurizr.Tags.SoftwareSystem) { Background = "#1168bd", Color = "#ffffff" });
-        styles.Add(new Structurizr.ElementStyle(Structurizr.Tags.Container) { Background = "#1168bd", Color = "#ffffff" });
-        styles.Add(new Structurizr.ElementStyle(Structurizr.Tags.Person) { Background = "#08427b", Color = "#ffffff", Shape = Structurizr.Shape.Person });
-
-        // https://emojipedia.org/snake/
-        // https://github.com/structurizr/themes
-        // https://ezgif.com/svg-to-png
-        var icons = Properties.Resources.ResourceManager.GetResourceSet(CultureInfo.InvariantCulture, true, true);
-        foreach (DictionaryEntry icon in icons)
-            styles.Add(new Structurizr.ElementStyle(icon.Key.ToString()) { Icon = GetPngBase64((byte[])icon.Value) });
-
-        styles.Add(new Structurizr.ElementStyle("IVS") { Background = "#e7285d" });
-
-        styles.Add(new Structurizr.ElementStyle("Database") { Shape = Structurizr.Shape.Cylinder });
-
-        styles.Add(new Structurizr.RelationshipStyle(Structurizr.Tags.Relationship) { FontSize = 18, Width = 400 }); // See Relationships: https://structurizr.com/help/notation
-        styles.Add(new Structurizr.RelationshipStyle(Structurizr.Tags.Synchronous) { Dashed = false });
-        styles.Add(new Structurizr.RelationshipStyle(Structurizr.Tags.Asynchronous) { Dashed = true });
+        // Add Styles
+        AddStyles(workspace.Views.Configuration);
 
         var (response, json) = client.PutWorkspace(workspaceId, workspace);
     }
-
-    private static string GetPngBase64(byte[] imageBytes) => $"data:image/png;base64,{Convert.ToBase64String(imageBytes)}";
-
-
-    private static void AddEdges(IEnumerable<Process> processes)
-    {
-        // Group all interactions between two nodes and the interaction type
-        var edges = processes
-            .SelectMany(p => p.Steps.Select(s => new { s.From, s.To, Step = s, Process = p }))
-            .GroupBy(e => (e.From, e.To, StepType: e.Step.GetType()));
-
-        foreach (var edge in edges)
-        {
-            var from = edge.Key.From.GetStructurizrObject();
-            dynamic to = edge.Key.To.GetStructurizrObject();
-            var d = string.Join('\n', edge.Select(e => e.Process.Name).Distinct());
-            var i = GetInteractionStyle(edge.Key.StepType);
-
-            Structurizr.Relationship r = from.Uses(to, d, "", i);
-
-        }
-    }
-
+    
     private static IEnumerable<Node> GetNodesInUse(IEnumerable<Process> ps)
     {
         foreach (var n in ps
@@ -211,7 +92,7 @@ internal class StructurizrBuilder
         }
     }
 
-    private static void AddNodes(IEnumerable<Node> nodes, Structurizr.Model model)
+    private static void AddNodes(Structurizr.Model model, IEnumerable<Node> nodes)
     {
         // This will add only the nodes in use
         // The separate foreach loops are important as they create the parents first
@@ -240,22 +121,150 @@ internal class StructurizrBuilder
         }
     }
 
-    private static Structurizr.InteractionStyle GetInteractionStyle(Step s)
+    private static void AddEdges(IEnumerable<Process> processes)
     {
-        if (s is AsyncStep)
-            return Structurizr.InteractionStyle.Asynchronous;
-        else if (s is SyncStep)
-            return Structurizr.InteractionStyle.Synchronous;
-        else
-            throw new Exception();
+        // Group all interactions between two nodes and the interaction type
+        var edges = processes
+            .SelectMany(p => p.Steps.Select(s => new { s.From, s.To, Step = s, Process = p }))
+            .GroupBy(e => (e.From, e.To, StepType: e.Step.GetType()));
+
+        foreach (var edge in edges)
+        {
+            var from = edge.Key.From.GetStructurizrObject();
+            dynamic to = edge.Key.To.GetStructurizrObject();
+            var d = string.Join('\n', edge.Select(e => e.Process.Name).Distinct());
+            var i = GetInteractionStyle(edge.Key.StepType);
+
+            Structurizr.Relationship r = from.Uses(to, d, "", i);
+        }
+
+        static Structurizr.InteractionStyle GetInteractionStyle(Type t)
+        {
+            if (t == typeof(AsyncStep))
+                return Structurizr.InteractionStyle.Asynchronous;
+            else if (t == typeof(SyncStep))
+                return Structurizr.InteractionStyle.Synchronous;
+            else
+                throw new Exception();
+        }
     }
-    private static Structurizr.InteractionStyle GetInteractionStyle(Type t)
+
+    private static void AddViews(Structurizr.ViewSet viewSet, IEnumerable<Node> nodes)
     {
-        if (t == typeof(AsyncStep))
-            return Structurizr.InteractionStyle.Asynchronous;
-        else if (t == typeof(SyncStep))
-            return Structurizr.InteractionStyle.Synchronous;
-        else
-            throw new Exception();
+        viewSet.Configuration.ViewSortOrder = Structurizr.ViewSortOrder.Type;
+
+        foreach (var ss in nodes.Where(n => n.Views.Contains(Views.SystemContextView)).Cast<SoftwareSystem>())
+        {
+            var v = viewSet.CreateSystemContextView(ss.GetStructurizrObject(), ss.Key, $"Helicopter view of '{ss.Name}'");
+            v.Title = $"[(1) System Context] {ss.Name}";
+
+            v.AddAllElements();
+            v.EnableAutomaticLayout(Structurizr.RankDirection.TopBottom, 300, 300, 300, true);
+        }
+
+        foreach (var ss in nodes.Where(n => n.Views.Contains(Views.ContainerView)).Cast<SoftwareSystem>())
+        {
+            var v = viewSet.CreateContainerView(ss.GetStructurizrObject(), "c" + ss.Key,
+                $"Interactions with the insides of '{ss.Name}'");
+            v.Title = $"[(2) Container] {ss.Name}";
+
+            v.AddAllElements();
+            v.EnableAutomaticLayout(Structurizr.RankDirection.TopBottom, 300, 300, 300, true);
+            // v.PaperSize = Structurizr.PaperSize.A0_Landscape;
+        }
+
+        foreach (var c in nodes.Where(n => n.Views.Contains(Views.ComponentView)))
+        {
+            if (c is Container cont)
+            {
+                if (cont.Children.Count ==
+                    0) // if this Container does not have any children (Components), the diagram will not show anything useful
+                    continue;
+
+                var v = viewSet.CreateComponentView(cont.GetStructurizrObject(), cont.Key,
+                    $"What is inside/interacts with {cont.Name}");
+
+                v.Title = $"[(3) Component ALL] {cont.Name}";
+
+                v.AddAllElements();
+                v.EnableAutomaticLayout(Structurizr.RankDirection.TopBottom, 300, 300, 300, false);
+            }
+            else if (c is Component comp)
+            {
+                var v = viewSet.CreateComponentView(comp.Parent.GetStructurizrObject(), "component-" + comp.Key,
+                    $"What interacts with {comp.Name}");
+                v.Title = $"[(3) Component DIRECT] {comp.Name}";
+
+                v.Add(comp.GetStructurizrObject());
+                v.AddNearestNeighbours(comp.GetStructurizrObject());
+
+                v.EnableAutomaticLayout();
+            }
+        }
+    }
+
+    private static void AddProcesses(ILogger logger, Structurizr.ViewSet viewSet, IEnumerable<Node> nodes, IEnumerable<Process> processes)
+    {
+        foreach (var p in processes)
+        {
+            var c = ((Container)nodes.Single(n => n.Key == "k8s")).GetStructurizrObject();
+            var v = viewSet.CreateDynamicView(c, $"process-{p.Name.ToKebabCase()}", p.Name);
+            v.Title = p.Name;
+
+            foreach (var s in p.Steps)
+            {
+                string d;
+                Structurizr.InteractionStyle interactionStyle;
+                if (s is AsyncStep ss)
+                {
+                    d = $"{s.Description}\n[{ss.Topic}]";
+                    interactionStyle = Structurizr.InteractionStyle.Asynchronous;
+                }
+                else if (s is SyncStep)
+                {
+                    d = s.Description;
+                    interactionStyle = Structurizr.InteractionStyle.Synchronous;
+
+                    if (string.IsNullOrWhiteSpace(s.Description))
+                        logger.LogWarning(
+                            $"Process '{p.Name}': Description of step '{s}' is empty - may show erroneously on diagram");
+                }
+                else
+                    throw new Exception();
+
+                // NOTE: v.Add() Only adds the first relationship to the diagram.
+                // Element.GetEfferentRelationshipWith only yields the first relationship.
+                var r = v.Add(s.From.GetStructurizrObject(), d, s.To.GetStructurizrObject());
+                r.Relationship.InteractionStyle = interactionStyle;
+            }
+
+            v.EnableAutomaticLayout(Structurizr.RankDirection.TopBottom, 300, 300, 300, false);
+        }
+    }
+
+    private static void AddStyles(Structurizr.ViewConfiguration config)
+    {
+        // https://structurizr.com/help/themes
+        // viewSet.Configuration.Theme = "default";
+        config.Styles.Add(new Structurizr.ElementStyle(Structurizr.Tags.SoftwareSystem) { Background = "#1168bd", Color = "#ffffff" });
+        config.Styles.Add(new Structurizr.ElementStyle(Structurizr.Tags.Container) { Background = "#1168bd", Color = "#ffffff" });
+        config.Styles.Add(new Structurizr.ElementStyle(Structurizr.Tags.Person) { Background = "#08427b", Color = "#ffffff", Shape = Structurizr.Shape.Person });
+
+        // https://emojipedia.org/snake/
+        // https://github.com/structurizr/themes
+        // https://ezgif.com/svg-to-png
+        var icons = Properties.Resources.ResourceManager.GetResourceSet(CultureInfo.InvariantCulture, true, true);
+        foreach (DictionaryEntry icon in icons)
+            config.Styles.Add(new Structurizr.ElementStyle(icon.Key.ToString()) { Icon = GetPngBase64((byte[])icon.Value) });
+
+        config.Styles.Add(new Structurizr.ElementStyle("IVS") { Background = "#e7285d" });
+
+        config.Styles.Add(new Structurizr.ElementStyle("Database") { Shape = Structurizr.Shape.Cylinder });
+
+        config.Styles.Add(new Structurizr.RelationshipStyle(Structurizr.Tags.Relationship) { FontSize = 18, Width = 400 }); // See Relationships: https://structurizr.com/help/notation
+        config.Styles.Add(new Structurizr.RelationshipStyle(Structurizr.Tags.Synchronous) { Dashed = false });
+        config.Styles.Add(new Structurizr.RelationshipStyle(Structurizr.Tags.Asynchronous) { Dashed = true });
+
+        static string GetPngBase64(byte[] imageBytes) => $"data:image/png;base64,{Convert.ToBase64String(imageBytes)}";
     }
 }
