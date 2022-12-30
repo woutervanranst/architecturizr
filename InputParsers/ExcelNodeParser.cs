@@ -80,10 +80,10 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
     /// <summary>
     /// Parse every row in the source to exactly one node type
     /// </summary>
-    /// <param name="nodeRows"></param>
+    /// <param name="rows"></param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
-    private IDictionary<string, Node> ParseNodes(IEnumerable<NodeRow> nodeRows)
+    private IDictionary<string, Node> ParseNodes(IEnumerable<NodeRow> rows)
     {
         // Checks:
         // 1. Use Dictionary to avoid duplicate keys
@@ -91,7 +91,7 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
 
         var nodes = new Dictionary<string, Node>();
 
-        foreach (var row in nodeRows)
+        foreach (var row in rows)
         {
             Node? n = null;
 
