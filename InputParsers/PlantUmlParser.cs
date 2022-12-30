@@ -68,6 +68,10 @@ internal partial class PlantUmlParser : IINputParser<Process>
             {
                 // Participant -- ignore
             }
+            else if (line.StartsWith("=="))
+            {
+                // Flowchart section -- ignore
+            }
             else if (SyncStepRegex().Match(line) is { Success: true } r1)
             {
                 // Sync step
