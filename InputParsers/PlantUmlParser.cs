@@ -95,27 +95,8 @@ internal partial class PlantUmlParser : IINputParser<Process>
             else if (AsyncStepRegex().Match(line) is { Success: true } r2)
             {
                 // Async step
-                var from = r2.Groups["from"].Value;
-                var to = r2.Groups["to"].Value;
-                var topic = r2.Groups["topic"].Value;
-                var description = r2.Groups["description"].Value;
-
-                try
-                {
-                    var s = new AsyncStep()
-                    {
-                        From = nodes[from],
-                        To = nodes[to],
-                        Topic = topic,
-                        Description = description,
-                    };
-
-                    p.Steps.Add(s);
-                }
-                catch (KeyNotFoundException e)
-                {
-                    throw new InvalidOperationException($"The Node '{e.GetKeyValue()}' is not defined");
-                }
+                var s = ParseAsyncStep(r2);
+                p.Steps.Add(s);
             }
             else
                 throw new Exception($"{f.Name}: Error on line {i}: '{line}' cannot be parsed");
@@ -124,11 +105,13 @@ internal partial class PlantUmlParser : IINputParser<Process>
         return p;
     }
 
-    private SyncStep ParseSyncStep(Match r1)
+    
+
+    private SyncStep ParseSyncStep(Match m)
     {
-        var from = r1.Groups["from"].Value;
-        var to = r1.Groups["to"].Value;
-        var description = r1.Groups["description"].Value;
+        var from = m.Groups["from"].Value;
+        var to = m.Groups["to"].Value;
+        var description = m.Groups["description"].Value;
 
         try
         {
@@ -145,5 +128,31 @@ internal partial class PlantUmlParser : IINputParser<Process>
         {
             throw new InvalidOperationException($"The Node '{e.GetKeyValue()}' is not defined");
         }
+    }
+
+    private AsyncStep ParseAsyncStep(Match m)
+    {
+        AsyncStep s;
+        var from = m.Groups["from"].Value;
+        var to = m.Groups["to"].Value;
+        var topic = m.Groups["topic"].Value;
+        var description = m.Groups["description"].Value;
+
+        try
+        {
+            s = new AsyncStep()
+            {
+                From = nodes[from],
+                To = nodes[to],
+                Topic = topic,
+                Description = description,
+            };
+        }
+        catch (KeyNotFoundException e)
+        {
+            throw new InvalidOperationException($"The Node '{e.GetKeyValue()}' is not defined");
+        }
+
+        return s;
     }
 }
