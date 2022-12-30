@@ -182,7 +182,7 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
         }
     }
 
-    private IEnumerable<string> ParseViews(Person o, NodeRow r)
+    private static IEnumerable<string> ParseViews(Person o, NodeRow r)
     {
         if (!string.IsNullOrWhiteSpace(r.SystemContextView))
             throw new NotImplementedException();
@@ -193,7 +193,7 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
 
         return Array.Empty<string>();
     }
-    private IEnumerable<string> ParseViews(SoftwareSystem o, NodeRow r)
+    private static IEnumerable<string> ParseViews(SoftwareSystem o, NodeRow r)
     {
         if (!string.IsNullOrWhiteSpace(r.SystemContextView))
             yield return Views.SystemContextView;
@@ -202,7 +202,7 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
         if (!string.IsNullOrWhiteSpace(r.ComponentView))
             throw new InvalidOperationException($"{o.GetType().Name} '{o.Key}' cannot have a ComponentView");
     }
-    private IEnumerable<string> ParseViews(Container c, NodeRow r)
+    private static IEnumerable<string> ParseViews(Container c, NodeRow r)
     {
         if (!string.IsNullOrWhiteSpace(r.SystemContextView))
             yield return Views.SystemContextView;
@@ -212,7 +212,7 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
             yield return Views.ComponentView;
 
     }
-    private IEnumerable<string> ParseViews(Component c, NodeRow r)
+    private static IEnumerable<string> ParseViews(Component c, NodeRow r)
     {
         if (!string.IsNullOrWhiteSpace(r.SystemContextView))
             yield return Views.SystemContextView;
@@ -222,28 +222,29 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
             yield return Views.ComponentView;
     }
 
+    private record GeneralRow
     {
-        public string Key { get; init; }
-        public string Value { get; init; }
+        public string? Key { get; init; }
+        public string? Value { get; init; }
     }
 
-    private class NodeRow
+    private record NodeRow
     {
         public int Row { get; init; }
-        public string PersonKey { get; init; }
-        public string SoftwareSystemKey { get; init; }
-        public string ContainerKey { get; init; }
-        public string ComponentKey { get; init; }
+        public string? PersonKey { get; init; }
+        public string? SoftwareSystemKey { get; init; }
+        public string? ContainerKey { get; init; }
+        public string? ComponentKey { get; init; }
 
-        public string Name { get; init; }
-        public string Technology { get; init; }
-        public string Owner { get; init; }
-        public string Deprecated { get; init; }
-        public string Description { get; init; }
+        public string? Name { get; init; }
+        public string? Technology { get; init; }
+        public string? Owner { get; init; }
+        public string? Deprecated { get; init; }
+        public string? Description { get; init; }
 
-        public string SystemContextView { get; init; }
-        public string ContainerView { get; init; }
-        public string ComponentView { get; init; }
+        public string? SystemContextView { get; init; }
+        public string? ContainerView { get; init; }
+        public string? ComponentView { get; init; }
 
         internal bool IsPersonRow =>
             !string.IsNullOrWhiteSpace(PersonKey) &&
