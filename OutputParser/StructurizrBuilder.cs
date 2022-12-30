@@ -147,8 +147,9 @@ internal class StructurizrBuilder
         styles.Add(new Structurizr.ElementStyle(Structurizr.Tags.Container) { Background = "#1168bd", Color = "#ffffff" });
         styles.Add(new Structurizr.ElementStyle(Structurizr.Tags.Person) { Background = "#08427b", Color = "#ffffff", Shape = Structurizr.Shape.Person });
 
-        styles.Add(new Structurizr.ElementStyle(Tags.Python) { Icon = Icons.pythonPng });
-        styles.Add(new Structurizr.ElementStyle(Tags.Scala) { Icon = Icons.scalaPng });
+        // https://emojipedia.org/snake/
+        styles.Add(new Structurizr.ElementStyle(Tags.Python) { Icon = GetPngBase64(Properties.Resources.Python) });
+        styles.Add(new Structurizr.ElementStyle(Tags.Scala) { Icon = GetPngBase64(Properties.Resources.Scala) });
 
         styles.Add(new Structurizr.ElementStyle("IVS") { Background = "#e7285d" });
 
@@ -158,9 +159,8 @@ internal class StructurizrBuilder
         client.PutWorkspace(workspaceId, workspace);
     }
 
+    private static string GetPngBase64(byte[] imageBytes) => $"data:image/png;base64,{Convert.ToBase64String(imageBytes)}";
 
-
-    
 
     private static void AddEdges(IEnumerable<Process> processes)
     {
