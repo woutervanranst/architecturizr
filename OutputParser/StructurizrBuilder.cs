@@ -150,6 +150,8 @@ internal class StructurizrBuilder
         // https://emojipedia.org/snake/
         styles.Add(new Structurizr.ElementStyle(Tags.Python) { Icon = GetPngBase64(Properties.Resources.Python) });
         styles.Add(new Structurizr.ElementStyle(Tags.Scala) { Icon = GetPngBase64(Properties.Resources.Scala) });
+        styles.Add(new Structurizr.ElementStyle(Tags.TypeScript) { Icon = GetPngBase64(Properties.Resources.TypeScript) });
+        styles.Add(new Structurizr.ElementStyle(Tags.React) { Icon = GetPngBase64(Properties.Resources.React) });
 
         styles.Add(new Structurizr.ElementStyle("IVS") { Background = "#e7285d" });
 

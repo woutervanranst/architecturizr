@@ -73,9 +73,29 @@ namespace architecturizr.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] React {
+            get {
+                object obj = ResourceManager.GetObject("React", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] Scala {
             get {
                 object obj = ResourceManager.GetObject("Scala", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] TypeScript {
+            get {
+                object obj = ResourceManager.GetObject("TypeScript", resourceCulture);
                 return ((byte[])(obj));
             }
         }

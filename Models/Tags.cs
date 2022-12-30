@@ -2,8 +2,9 @@
 
 internal sealed class Tags
 {
+    public const string React = "React";
+    public const string TypeScript = "TypeScript";
     public const string Scala = "Scala";
-
     public const string Python = "Python";
 }
 
