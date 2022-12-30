@@ -124,11 +124,13 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
                 if (n != null)
                     throw new InvalidOperationException($"Row #{row.Row} matches multiple types");
 
+                ValidateTechnologyIconExists(row);
+
                 // Container
                 var parent = nodes.ContainsKey(row.SoftwareSystemKey) ?
                     (SoftwareSystem)nodes[row.SoftwareSystemKey] :
                     throw new InvalidOperationException($"Parent '{row.SoftwareSystemKey}' of row #{row.Row} is not defined.");
-
+                
                 n = new Container(parent, row.ContainerKey)
                 {
                     Name = row.Name,
@@ -141,6 +143,8 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
             {
                 if (n != null)
                     throw new InvalidOperationException($"Row #{row.Row} matches multiple types");
+
+                ValidateTechnologyIconExists(row);
 
                 // Component
                 var parent = nodes.ContainsKey(row.ContainerKey) ?
@@ -169,6 +173,15 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
         }
 
         return nodes;
+
+        void ValidateTechnologyIconExists(NodeRow node)
+        {
+            if (node.Technology is null)
+                return;
+            
+            if (Properties.Resources.ResourceManager.GetObject(node.Technology) is null)
+                logger.LogWarning($"Technology '{node.Technology}' does not have an icon defined.");
+        }
     }
 
     private IEnumerable<string> ParseViews(Person o, NodeRow r)
