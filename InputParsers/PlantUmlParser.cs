@@ -41,19 +41,7 @@ internal partial class PlantUmlParser : IINputParser<Process>
     public Process Parse(FileInfo f)
     {
         var lines = File.ReadAllLines(f.FullName);
-            //.Where(l => !string.IsNullOrWhiteSpace(l)) // remove empty lines from the file
-            //.ToArray();
-
-        /*
-         * multiline tryout
-         * 
-         * ! case insensitive
-         * ! dotall
-         * /(?<=title )(?<processName>([a-zA-Z0-9 ][^\r\n])*).*(?<=product: )(?<product>([a-zA-Z0-9 ][^\r\n])*).*(?<=source: )(?<source>([a-zA-Z0-9 ][^\r\n])*)/gis
-         * 
-         * stuck: how to not match a newline in a dotall regex
-         */
-
+        
         var p = new Process();
 
         for (var i = 0; i < lines.Length; i++)
