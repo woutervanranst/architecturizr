@@ -13,8 +13,9 @@ internal abstract class Node
     public string Name { get; init; }
 
     public string Description { get; init; }
+    public string? Technology { get; init; }
 
-    public string Owner { get; init; }
+    public string? Owner { get; init; }
 
     public List<string> Views { get; } = new();
 
@@ -88,9 +89,7 @@ internal class Container : Node
     public override Structurizr.Container GetStructurizrObject() => structurizrObject;
     public Structurizr.Container SetStructurizrObject(Structurizr.Container o) => structurizrObject = o;
     private Structurizr.Container structurizrObject;
-
-    public string? Technology { get; init; }
-
+    
     public SoftwareSystem Parent { get; }
 
     public List<Component> Children { get; } = new List<Component>();
@@ -109,6 +108,4 @@ internal class Component : Node
     private Structurizr.Component structurizrObject;
 
     public Container Parent { get; }
-
-    public string? Technology { get; init; }
 }

@@ -95,6 +95,8 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
         {
             Node? n = null;
 
+            ValidateTechnologyIconExists(row);
+
             if (row.IsPersonRow)
             {
                 // Person
@@ -124,8 +126,6 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
                 if (n != null)
                     throw new InvalidOperationException($"Row #{row.Row} matches multiple types");
 
-                ValidateTechnologyIconExists(row);
-
                 // Container
                 var parent = nodes.ContainsKey(row.SoftwareSystemKey) ?
                     (SoftwareSystem)nodes[row.SoftwareSystemKey] :
@@ -143,8 +143,6 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
             {
                 if (n != null)
                     throw new InvalidOperationException($"Row #{row.Row} matches multiple types");
-
-                ValidateTechnologyIconExists(row);
 
                 // Component
                 var parent = nodes.ContainsKey(row.ContainerKey) ?

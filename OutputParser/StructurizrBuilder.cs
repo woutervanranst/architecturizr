@@ -211,7 +211,8 @@ internal class StructurizrBuilder
 
     private static void AddNodes(IEnumerable<Node> nodes, Structurizr.Model model)
     {
-        // Only the nodes in use
+        // This will add only the nodes in use
+        // The separate foreach loops are important as they create the parents first
         foreach (var person in nodes.OfType<Person>())
             person.SetStructurizrObject(model.AddPerson(person.Name, person.Description));
 
@@ -222,19 +223,15 @@ internal class StructurizrBuilder
             cont.SetStructurizrObject(cont.Parent.GetStructurizrObject().AddContainer(cont.Name, cont.Description, cont.Technology));
 
         foreach (var comp in nodes.OfType<Component>())
-        {
-            var c = comp.Parent.GetStructurizrObject().AddComponent(comp.Name, comp.Description, comp.Technology);
-            comp.SetStructurizrObject(c);
+            comp.SetStructurizrObject(comp.Parent.GetStructurizrObject().AddComponent(comp.Name, comp.Description, comp.Technology));
 
-            c.AddTags(c.Technology);
-            //if (!string.IsNullOrWhiteSpace(comp.Owner))
-            //    c.AddTags("IVS");
-        }
-
-        foreach (var n in nodes)
+        foreach (var node in nodes)
         {
-            if (!string.IsNullOrWhiteSpace(n.Owner))
-                n.GetStructurizrObject().AddTags("IVS");
+            if (!string.IsNullOrWhiteSpace(node.Technology))
+                node.GetStructurizrObject().AddTags(node.Technology);
+
+            if (!string.IsNullOrWhiteSpace(node.Owner))
+                node.GetStructurizrObject().AddTags("IVS");
         }
     }
 
