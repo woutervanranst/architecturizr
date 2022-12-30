@@ -222,7 +222,6 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
             yield return Views.ComponentView;
     }
 
-    private class GeneralRow
     {
         public string Key { get; init; }
         public string Value { get; init; }
