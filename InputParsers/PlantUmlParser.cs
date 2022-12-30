@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace architecturizr.InputParsers;
 
-internal partial class PlantUmlParser : IINputParser<Process>
+internal partial class PlantUmlParser // : IINputParser<Process>
 {
     public PlantUmlParser(ILogger<PlantUmlParser> logger)
     {
@@ -36,13 +36,17 @@ internal partial class PlantUmlParser : IINputParser<Process>
     [GeneratedRegex(@"(?<to>[\w-]*) ?<-- ?(?<from>[\w-]*) ?: ?\ ?(?<description>.*)")]
     private static partial Regex SyncReturnRegex();
 
+    [GeneratedRegex(@"==\s*(?<sectionName>.*?)\s*==")]
+    private static partial Regex SectionRegex();
+
     // trade-universe-importer<--quote-provider-api:Return filtered instrument list with instruments that have quotes
 
-    public Process Parse(FileInfo f)
+    public IEnumerable<Process> Parse(FileInfo f)
     {
         var lines = File.ReadAllLines(f.FullName);
         
         var p = new Process();
+        string title = null;
 
         for (var i = 0; i < lines.Length; i++)
         {
@@ -55,6 +59,7 @@ internal partial class PlantUmlParser : IINputParser<Process>
             {
                 // Title
                 p.Name = r0.Value;
+                title = r0.Value;
             }
             else if (line.StartsWith("#") || line.StartsWith("'"))
             {
@@ -68,9 +73,13 @@ internal partial class PlantUmlParser : IINputParser<Process>
             {
                 // Participant -- ignore
             }
-            else if (line.StartsWith("=="))
+            else if (SectionRegex().Match(line) is { Success: true} r4)
             {
-                // Flowchart section -- ignore
+                // Flowchart section
+                if (p.Steps.Count != 0)
+                    yield return p;
+                
+                p = new Process() { Name = $"{title} - {r4.Groups["sectionName"].Value}" };
             }
             else if (SyncStepRegex().Match(line) is { Success: true } r1)
             {
@@ -94,7 +103,7 @@ internal partial class PlantUmlParser : IINputParser<Process>
                 throw new Exception($"{f.Name}: Error on line {i}: '{line}' cannot be parsed");
         }
 
-        return p;
+        yield return p;
     }
 
     
