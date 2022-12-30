@@ -88,9 +88,9 @@ internal partial class PlantUmlParser : IINputParser<Process>
             }
             else if (SyncReturnRegex().Match(line) is { Success: true } r3)
             {
-                // A Sync Return Step
-                var s = ParseSyncStep(r3);
-                p.Steps.Add(s);
+                // A Sync Return Step -- ignore this for now, this makes the diagram confusing
+                //var s = ParseSyncStep(r3);
+                //p.Steps.Add(s);
             }
             else if (AsyncStepRegex().Match(line) is { Success: true } r2)
             {
