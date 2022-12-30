@@ -23,12 +23,11 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
 
         // Parse General Tab
         using var fs1 = excel.OpenRead();
-        var generalRows = fs1.ExcelToEnumerable<GeneralRow>(
-            x => x
+        var generalRows = fs1.ExcelToEnumerable<GeneralRow>(o => o
                 .UsingSheet("General")
                 .UsingHeaderNames(false) //map using column numbers, not names
-                .OutputExceptionsTo(exceptionList)
-            ).ToArray();
+                .OutputExceptionsTo(exceptionList))
+            .ToArray();
 
         if (exceptionList.Any())
             throw new Exception();
@@ -39,15 +38,14 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
 
         // Parse Nodes Tab
         using var fs2 = excel.OpenRead();
-        var nodeRows = fs2.ExcelToEnumerable<NodeRow>(
-            x => x
+        var nodeRows = fs2.ExcelToEnumerable<NodeRow>(o => o
                 .UsingSheet("Nodes")
                 .OutputExceptionsTo(exceptionList)
 
                 .IgnoreColumsWithoutMatchingProperties()
 
-                .Property(x => x.Row).MapsToRowNumber()
-            ).ToArray();
+                .Property(r => r.Row).MapsToRowNumber())
+            .ToArray();
 
         if (exceptionList.Any())
             throw new Exception();
