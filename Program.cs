@@ -83,7 +83,14 @@ static IEnumerable<Process> GetProcesses(IServiceProvider serviceProvider, IDict
     processParser.SetNodes(nodes);
 
     var ps = processesDirectory.GetFiles("*.puml", SearchOption.AllDirectories)
-        .Select(fi => processParser.Parse(fi))
+        .Select(fi => (SourceFile: fi, Process: processParser.Parse(fi)))
         .ToArray();
-    return ps;
+
+    if (ps.GroupBy(p => p.Process.Name)
+            .FirstOrDefault(g => g.Count() > 1) is { } g)
+    {
+        throw new Exception($"Duplicate process name: '{g.Key}' is used in {string.Join("' and '", g.Select(p => p.SourceFile.FullName))}");
+    }
+
+    return ps.Select(p => p.Process).ToArray();
 }
