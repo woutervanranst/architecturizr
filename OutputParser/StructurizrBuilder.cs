@@ -1,4 +1,6 @@
-﻿using architecturizr.Models;
+﻿using System.Collections;
+using System.Globalization;
+using architecturizr.Models;
 using architecturizr.Utils;
 using Microsoft.Extensions.Logging;
 using Structurizr.Api;
@@ -141,10 +143,11 @@ internal class StructurizrBuilder
         styles.Add(new Structurizr.ElementStyle(Structurizr.Tags.Person) { Background = "#08427b", Color = "#ffffff", Shape = Structurizr.Shape.Person });
 
         // https://emojipedia.org/snake/
-        styles.Add(new Structurizr.ElementStyle(Tags.Python) { Icon = GetPngBase64(Properties.Resources.Python) });
-        styles.Add(new Structurizr.ElementStyle(Tags.Scala) { Icon = GetPngBase64(Properties.Resources.Scala) });
-        styles.Add(new Structurizr.ElementStyle(Tags.TypeScript) { Icon = GetPngBase64(Properties.Resources.TypeScript) });
-        styles.Add(new Structurizr.ElementStyle(Tags.React) { Icon = GetPngBase64(Properties.Resources.React) });
+        // https://github.com/structurizr/themes
+        // https://ezgif.com/svg-to-png
+        var icons = Properties.Resources.ResourceManager.GetResourceSet(CultureInfo.InvariantCulture, true, true);
+        foreach (DictionaryEntry icon in icons)
+            styles.Add(new Structurizr.ElementStyle(icon.Key.ToString()) { Icon = GetPngBase64((byte[])icon.Value) });
 
         styles.Add(new Structurizr.ElementStyle("IVS") { Background = "#e7285d" });
 
@@ -152,7 +155,7 @@ internal class StructurizrBuilder
         styles.Add(new Structurizr.RelationshipStyle(Structurizr.Tags.Synchronous) { Dashed = false });
         styles.Add(new Structurizr.RelationshipStyle(Structurizr.Tags.Asynchronous) { Dashed = true });
 
-        var (_, json) = client.PutWorkspace(workspaceId, workspace);
+        var (response, json) = client.PutWorkspace(workspaceId, workspace);
     }
 
     private static string GetPngBase64(byte[] imageBytes) => $"data:image/png;base64,{Convert.ToBase64String(imageBytes)}";

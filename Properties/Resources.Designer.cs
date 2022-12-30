@@ -63,6 +63,26 @@ namespace architecturizr.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] AppRunner {
+            get {
+                object obj = ResourceManager.GetObject("AppRunner", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] Kubernetes {
+            get {
+                object obj = ResourceManager.GetObject("Kubernetes", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] Python {
             get {
                 object obj = ResourceManager.GetObject("Python", resourceCulture);
