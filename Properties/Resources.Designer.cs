@@ -83,9 +83,29 @@ namespace architecturizr.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] Flutter {
+            get {
+                object obj = ResourceManager.GetObject("Flutter", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] Kubernetes {
             get {
                 object obj = ResourceManager.GetObject("Kubernetes", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] MongoDB {
+            get {
+                object obj = ResourceManager.GetObject("MongoDB", resourceCulture);
                 return ((byte[])(obj));
             }
         }

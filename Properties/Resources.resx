@@ -124,8 +124,14 @@
   <data name="AWS" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\AWS.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="Flutter" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Flutter.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="Kubernetes" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Kubernetes.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="MongoDB" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\MongoDB.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="Python" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Python.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
