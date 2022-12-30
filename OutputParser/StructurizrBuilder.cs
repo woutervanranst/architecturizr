@@ -52,7 +52,7 @@ internal class StructurizrBuilder
         AddEdges(processes);
 
         // Add Views
-        AddViews(workspace.Views, nodes);
+        AddViews(workspace.Views, nodes, processes);
 
         // Add Processes
         AddProcesses(logger, workspace.Views, nodes, processes);
@@ -149,56 +149,106 @@ internal class StructurizrBuilder
         }
     }
 
-    private static void AddViews(Structurizr.ViewSet viewSet, IEnumerable<Node> nodes)
+    private static void AddViews(Structurizr.ViewSet viewSet, IEnumerable<Node> nodes, IEnumerable<Process> processes)
     {
         viewSet.Configuration.ViewSortOrder = Structurizr.ViewSortOrder.Type;
 
+        // Add Landscape View
+        var lsv = viewSet.CreateSystemLandscapeView("landscape", "Overview");
+        lsv.AddDefaultElements();
+        lsv.EnableAutomaticLayout(Structurizr.RankDirection.TopBottom, 300, 300, 300, true);
+
+        // Add System Context Diagrams: https://structurizr.com/help/system-context-diagram
         foreach (var ss in nodes.Where(n => n.Views.Contains(Views.SystemContextView)).Cast<SoftwareSystem>())
         {
-            var v = viewSet.CreateSystemContextView(ss.GetStructurizrObject(), ss.Key, $"Helicopter view of '{ss.Name}'");
-            v.Title = $"[(1) System Context] {ss.Name}";
+            var v = viewSet.CreateSystemContextView(ss.GetStructurizrObject(), $"sc-{ss.Key}" , $"Helicopter view of '{ss.Name}'");
+            //v.Title = $"[(1) System Context] {ss.Name}";
+            v.Title = $"Overview of {ss.Name}";
 
-            v.AddAllElements();
+            //v.AddAllElements();
+            v.AddDefaultElements();
             v.EnableAutomaticLayout(Structurizr.RankDirection.TopBottom, 300, 300, 300, true);
         }
 
+        // Add Container Diagrams: https://structurizr.com/help/container-diagram
         foreach (var ss in nodes.Where(n => n.Views.Contains(Views.ContainerView)).Cast<SoftwareSystem>())
         {
-            var v = viewSet.CreateContainerView(ss.GetStructurizrObject(), "c" + ss.Key,
-                $"Interactions with the insides of '{ss.Name}'");
-            v.Title = $"[(2) Container] {ss.Name}";
+            var v = viewSet.CreateContainerView(ss.GetStructurizrObject(), $"cont-{ss.Key}", $"What is inside {ss.Name} and what do they interact with");
+            //v.Title = $"[(2) Container] {ss.Name}";
+            v.Title = $"Inside {ss.Name}";
 
-            v.AddAllElements();
+            //v.AddAllElements();
+            v.AddDefaultElements();
             v.EnableAutomaticLayout(Structurizr.RankDirection.TopBottom, 300, 300, 300, true);
             // v.PaperSize = Structurizr.PaperSize.A0_Landscape;
         }
 
-        foreach (var c in nodes.Where(n => n.Views.Contains(Views.ComponentView)))
+        // Add Component Diagrams: https://structurizr.com/help/component-diagram
+        foreach (var cont in nodes.OfType<Container>()
+                 .Where(n => n.Views.Contains(Views.ComponentView)))
         {
-            if (c is Container cont)
+            var v = viewSet.CreateComponentView(cont.GetStructurizrObject(), $"comp1-{cont.Key}", $"What is inside {cont.Name} and what do they interact with");
+            v.Title = $"Inside {cont.Name}";
+
+            v.AddDefaultElements();
+            v.EnableAutomaticLayout(Structurizr.RankDirection.TopBottom, 300, 300, 300, true);
+        }
+        foreach (var comp in nodes.OfType<Component>()
+                .Where(n => n.Views.Contains(Views.ComponentView))
+                .Where(n => DirectRelationships(n, processes).Count() > 2))
+        {
+            var v = viewSet.CreateComponentView(comp.Parent.GetStructurizrObject(), $"comp2-{comp.Key}", $"What interacts with {comp.Name}");
+            v.Title = $"What interacts with {comp.Name}";
+
+            v.AddNearestNeighbours(comp.GetStructurizrObject());
+            v.EnableAutomaticLayout(Structurizr.RankDirection.TopBottom, 300, 300, 300, true);
+
+        }
+
+        
+
+        //foreach (var c in nodes.Where(n => n.Views.Contains(Views.ComponentView)))
+        //{
+        //    if (c is Container cont)
+        //    {
+        //        if (cont.Children.Count ==
+        //            0) // if this Container does not have any children (Components), the diagram will not show anything useful
+        //            continue;
+
+            //        var v = viewSet.CreateComponentView(cont.GetStructurizrObject(), cont.Key,
+            //            $"What is inside/interacts with {cont.Name}");
+
+            //        v.Title = $"[(3) Component ALL] {cont.Name}";
+
+            //        v.AddAllElements();
+            //        v.EnableAutomaticLayout(Structurizr.RankDirection.TopBottom, 300, 300, 300, false);
+            //    }
+            //    else if (c is Component comp)
+            //    {
+            //        if (comp.Name == "grpc-api")
+            //        {
+            //        }
+
+            //        var v = viewSet.CreateComponentView(comp.Parent.GetStructurizrObject(), "component-" + comp.Key,
+            //            $"What interacts with {comp.Name}");
+            //        v.Title = $"[(3) Component DIRECT] {comp.Name}";
+
+            //        v.Add(comp.GetStructurizrObject());
+            //        v.AddNearestNeighbours(comp.GetStructurizrObject());
+
+            //        v.EnableAutomaticLayout();
+            //    }
+            //}
+    }
+
+    private static IEnumerable<Node> DirectRelationships(Node n, IEnumerable<Process> processes)
+    {
+        foreach (var p in processes)
+        {
+            foreach (var s in p.Steps)
             {
-                if (cont.Children.Count ==
-                    0) // if this Container does not have any children (Components), the diagram will not show anything useful
-                    continue;
-
-                var v = viewSet.CreateComponentView(cont.GetStructurizrObject(), cont.Key,
-                    $"What is inside/interacts with {cont.Name}");
-
-                v.Title = $"[(3) Component ALL] {cont.Name}";
-
-                v.AddAllElements();
-                v.EnableAutomaticLayout(Structurizr.RankDirection.TopBottom, 300, 300, 300, false);
-            }
-            else if (c is Component comp)
-            {
-                var v = viewSet.CreateComponentView(comp.Parent.GetStructurizrObject(), "component-" + comp.Key,
-                    $"What interacts with {comp.Name}");
-                v.Title = $"[(3) Component DIRECT] {comp.Name}";
-
-                v.Add(comp.GetStructurizrObject());
-                v.AddNearestNeighbours(comp.GetStructurizrObject());
-
-                v.EnableAutomaticLayout();
+                if (s.From == n || s.To == n)
+                    yield return n;
             }
         }
     }
@@ -207,7 +257,11 @@ internal class StructurizrBuilder
     {
         foreach (var p in processes)
         {
+            //var x = p.Steps.Select(s => s.From).Concat(p.Steps.Select(s => s.To)).GroupBy(n => n.Key);
+            //var y = x.OrderBy(z => z.Count()).Last();
+            //var c = y.First().GetStructurizrObject().Parent as Structurizr.Container;
             var c = ((Container)nodes.Single(n => n.Key == "k8s")).GetStructurizrObject();
+            //var c = p.Steps.Select(s => s.From).Concat(p.Steps.Select(s => s.To)).OfType<Container>().First().GetStructurizrObject();
             var v = viewSet.CreateDynamicView(c, $"process-{p.Name.ToKebabCase()}", p.Name);
             v.Title = p.Name;
 
@@ -260,6 +314,8 @@ internal class StructurizrBuilder
         config.Styles.Add(new Structurizr.ElementStyle("IVS") { Background = "#e7285d" });
 
         config.Styles.Add(new Structurizr.ElementStyle("Database") { Shape = Structurizr.Shape.Cylinder });
+        config.Styles.Add(new Structurizr.ElementStyle("Mobile App") { Shape = Structurizr.Shape.MobileDevicePortrait });
+
 
         config.Styles.Add(new Structurizr.RelationshipStyle(Structurizr.Tags.Relationship) { FontSize = 18, Width = 400 }); // See Relationships: https://structurizr.com/help/notation
         config.Styles.Add(new Structurizr.RelationshipStyle(Structurizr.Tags.Synchronous) { Dashed = false });
