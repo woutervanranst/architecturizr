@@ -188,7 +188,6 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
             yield return Views.SystemContextView;
         if (!string.IsNullOrWhiteSpace(r.ContainerView))
             yield return Views.ContainerView;
-            //throw new InvalidOperationException($"{o.GetType().Name} '{o.Key}' cannot have a ContainerView");
         if (!string.IsNullOrWhiteSpace(r.ComponentView))
             throw new InvalidOperationException($"{o.GetType().Name} '{o.Key}' cannot have a ComponentView");
     }
@@ -198,7 +197,7 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
             yield return Views.SystemContextView;
         if (!string.IsNullOrWhiteSpace(r.ContainerView))
             yield return Views.ContainerView;
-        if (!string.IsNullOrWhiteSpace(r.ComponentView)) //yes
+        if (!string.IsNullOrWhiteSpace(r.ComponentView))
             yield return Views.ComponentView;
 
     }
@@ -208,7 +207,7 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
             yield return Views.SystemContextView;
         if (!string.IsNullOrWhiteSpace(r.ContainerView))
             yield return Views.ContainerView;
-        if (!string.IsNullOrWhiteSpace(r.ComponentView)) //yes
+        if (!string.IsNullOrWhiteSpace(r.ComponentView))
             yield return Views.ComponentView;
     }
 
