@@ -89,7 +89,7 @@ internal class Container : Node
     public Structurizr.Container SetStructurizrObject(Structurizr.Container o) => structurizrObject = o;
     private Structurizr.Container structurizrObject;
 
-    public string Technology { get; init; }
+    public string? Technology { get; init; }
 
     public SoftwareSystem Parent { get; }
 
@@ -110,5 +110,5 @@ internal class Component : Node
 
     public Container Parent { get; }
 
-    public string Technology { get; init; }
+    public string? Technology { get; init; }
 }
