@@ -135,7 +135,7 @@ internal class StructurizrBuilder
 
         // https://github.com/structurizr/dotnet-core-quickstart/blob/master/structurizr/Program.cs
 
-        // https://structurizr.com/help/themess
+        // https://structurizr.com/help/themes
         // viewSet.Configuration.Theme = "default";
         var styles = viewSet.Configuration.Styles;
         styles.Add(new Structurizr.ElementStyle(Structurizr.Tags.SoftwareSystem) { Background = "#1168bd", Color = "#ffffff" });
@@ -150,6 +150,8 @@ internal class StructurizrBuilder
             styles.Add(new Structurizr.ElementStyle(icon.Key.ToString()) { Icon = GetPngBase64((byte[])icon.Value) });
 
         styles.Add(new Structurizr.ElementStyle("IVS") { Background = "#e7285d" });
+
+        styles.Add(new Structurizr.ElementStyle("Database") { Shape = Structurizr.Shape.Cylinder });
 
         styles.Add(new Structurizr.RelationshipStyle(Structurizr.Tags.Relationship) { FontSize = 18, Width = 400 }); // See Relationships: https://structurizr.com/help/notation
         styles.Add(new Structurizr.RelationshipStyle(Structurizr.Tags.Synchronous) { Dashed = false });
@@ -229,6 +231,9 @@ internal class StructurizrBuilder
         {
             if (!string.IsNullOrWhiteSpace(node.Technology))
                 node.GetStructurizrObject().AddTags(node.Technology);
+
+            if (!string.IsNullOrWhiteSpace(node.Tags))
+                node.GetStructurizrObject().AddTags(node.Tags.Split(',').Select(t => t.Trim()).ToArray());
 
             if (!string.IsNullOrWhiteSpace(node.Owner))
                 node.GetStructurizrObject().AddTags("IVS");

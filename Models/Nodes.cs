@@ -14,7 +14,7 @@ internal abstract class Node
 
     public string Description { get; init; }
     public string? Technology { get; init; }
-
+    public string? Tags { get; init; }
     public string? Owner { get; init; }
 
     public List<string> Views { get; } = new();

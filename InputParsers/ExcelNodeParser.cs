@@ -104,7 +104,8 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
                 {
                     Name = row.Name,
                     Description = row.Description,
-                    Technology = row.Technology
+                    Technology = row.Technology,
+                    Tags = row.Tags
                 };
             }
             if (row.IsSoftwareSystemRow)
@@ -118,6 +119,7 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
                     Name = row.Name,
                     Description = row.Description,
                     Technology = row.Technology,
+                    Tags = row.Tags,
                     Owner = row.Owner
                 };
             }
@@ -136,6 +138,7 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
                     Name = row.Name,
                     Description = row.Description,
                     Technology = row.Technology,
+                    Tags = row.Tags,
                     Owner = row.Owner
                 };
             }
@@ -154,6 +157,7 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
                     Name = row.Name,
                     Description = row.Description,
                     Technology = row.Technology,
+                    Tags = row.Tags,
                     Owner = row.Owner
                 };
             }
@@ -238,6 +242,7 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
 
         public string? Name { get; init; }
         public string? Technology { get; init; }
+        public string? Tags { get; init; }
         public string? Owner { get; init; }
         public string? Deprecated { get; init; }
         public string? Description { get; init; }
