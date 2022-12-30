@@ -88,7 +88,6 @@ internal class StructurizrBuilder
 
         foreach (var p in processes)
         {
-            //var c = ((SoftwareSystem)nodes.Where(n => n.Key == "ivs-be").Single()).StructurizrObject;
             var c = ((Container)nodes.Single(n => n.Key == "k8s")).GetStructurizrObject();
             var v = viewSet.CreateDynamicView(c, $"process-{p.Name.ToKebabCase()}", p.Name);
             v.Title = p.Name;
@@ -108,7 +107,7 @@ internal class StructurizrBuilder
                     interactionStyle = Structurizr.InteractionStyle.Synchronous;
 
                     if (string.IsNullOrWhiteSpace(s.Description))
-                        logger.LogWarning($"Description is empty - may show erroneously on diagram");
+                        logger.LogWarning($"Process '{p.Name}': Description of step '{s}' is empty - may show erroneously on diagram");
                 }
                 else
                     throw new Exception();
@@ -117,13 +116,7 @@ internal class StructurizrBuilder
                 // Element.GetEfferentRelationshipWith only yields the first relationship.
                 var r = v.Add(s.From.GetStructurizrObject(), d, s.To.GetStructurizrObject());
                 r.Relationship.InteractionStyle = interactionStyle;
-
-                //foreach (var r in s.From.GetStructurizrObject().Relationships)
-                //   if (s.To.GetStructurizrObject() == r.Destination)
-                //        v.Add(r, Structurizr.InteractionStyle.Asynchronous);
-
             }
-
 
             v.EnableAutomaticLayout(Structurizr.RankDirection.TopBottom, 300, 300, 300, false);
         }
