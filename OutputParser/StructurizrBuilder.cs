@@ -152,7 +152,7 @@ internal class StructurizrBuilder
         styles.Add(new Structurizr.RelationshipStyle(Structurizr.Tags.Synchronous) { Dashed = false });
         styles.Add(new Structurizr.RelationshipStyle(Structurizr.Tags.Asynchronous) { Dashed = true });
 
-        client.PutWorkspace(workspaceId, workspace);
+        var (_, json) = client.PutWorkspace(workspaceId, workspace);
     }
 
     private static string GetPngBase64(byte[] imageBytes) => $"data:image/png;base64,{Convert.ToBase64String(imageBytes)}";
