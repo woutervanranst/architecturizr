@@ -89,7 +89,7 @@ static IEnumerable<Process> GetProcesses(IServiceProvider serviceProvider, IDict
     if (ps.GroupBy(p => p.Name)
             .FirstOrDefault(g => g.Count() > 1) is { } g)
     {
-        throw new Exception($"Duplicate process name: '{g.Key}'");
+        throw new Exception($"Duplicate process name: '{g.Key}' is used in {string.Join("' and '", g.Select(p => p.Source.FullName))}");
     }
 
     return ps;

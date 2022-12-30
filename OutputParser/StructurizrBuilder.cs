@@ -132,7 +132,7 @@ internal class StructurizrBuilder
         {
             var from = edge.Key.From.GetStructurizrObject();
             dynamic to = edge.Key.To.GetStructurizrObject();
-            var d = string.Join('\n', edge.Select(e => e.Process.Name).Distinct());
+            var d = string.Join('\n', edge.Select(e => e.Process.Description).Distinct());
             var i = GetInteractionStyle(edge.Key.StepType);
 
             Structurizr.Relationship r = from.Uses(to, d, "", i);

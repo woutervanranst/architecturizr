@@ -2,7 +2,14 @@
 
 internal class Process
 {
+    public Process(FileInfo source)
+    {
+        Source = source;
+    }
+
+    public FileInfo Source { get; }
     public string Name { get; set; }
+    public string Description { get; set; }
 
     public List<Step> Steps { get; } = new();
 

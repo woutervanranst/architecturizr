@@ -41,11 +41,11 @@ internal partial class PlantUmlParser // : IINputParser<Process>
 
     // trade-universe-importer<--quote-provider-api:Return filtered instrument list with instruments that have quotes
 
-    public IEnumerable<Process> Parse(FileInfo f)
+    public IEnumerable<Process> Parse(FileInfo fi)
     {
-        var lines = File.ReadAllLines(f.FullName);
+        var lines = File.ReadAllLines(fi.FullName);
         
-        var p = new Process();
+        var p = new Process(fi);
         string title = null;
 
         for (var i = 0; i < lines.Length; i++)
@@ -59,6 +59,7 @@ internal partial class PlantUmlParser // : IINputParser<Process>
             {
                 // Title
                 p.Name = r0.Value;
+                p.Description = r0.Value;
                 title = r0.Value;
             }
             else if (line.StartsWith("#") || line.StartsWith("'"))
@@ -79,7 +80,11 @@ internal partial class PlantUmlParser // : IINputParser<Process>
                 if (p.Steps.Count != 0)
                     yield return p;
                 
-                p = new Process() { Name = $"{title} - {r4.Groups["sectionName"].Value}" };
+                p = new Process(fi)
+                {
+                    Name = $"{title} - {r4.Groups["sectionName"].Value}",
+                    Description = title
+                };
             }
             else if (SyncStepRegex().Match(line) is { Success: true } r1)
             {
@@ -100,7 +105,7 @@ internal partial class PlantUmlParser // : IINputParser<Process>
                 p.Steps.Add(s);
             }
             else
-                throw new Exception($"{f.Name}: Error on line {i}: '{line}' cannot be parsed");
+                throw new Exception($"{fi.Name}: Error on line {i}: '{line}' cannot be parsed");
         }
 
         yield return p;
