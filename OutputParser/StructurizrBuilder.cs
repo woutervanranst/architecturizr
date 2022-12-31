@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Drawing;
 using System.Globalization;
 using architecturizr.Models;
 using architecturizr.Utils;
@@ -368,12 +369,7 @@ internal class StructurizrBuilder
 
     private static void AddStyles(Structurizr.ViewConfiguration config)
     {
-        // https://structurizr.com/help/themes
-        // viewSet.Configuration.Theme = "default";
-        config.Styles.Add(new Structurizr.ElementStyle(Structurizr.Tags.SoftwareSystem) { Background = "#1168bd", Color = "#ffffff" });
-        config.Styles.Add(new Structurizr.ElementStyle(Structurizr.Tags.Container) { Background = "#1168bd", Color = "#ffffff" });
-        config.Styles.Add(new Structurizr.ElementStyle(Structurizr.Tags.Person) { Background = "#08427b", Color = "#ffffff", Shape = Structurizr.Shape.Person });
-
+        // Add Icons
         // https://emojipedia.org/snake/
         // https://github.com/structurizr/themes
         // https://ezgif.com/svg-to-png
@@ -381,16 +377,25 @@ internal class StructurizrBuilder
         foreach (DictionaryEntry icon in icons)
             config.Styles.Add(new Structurizr.ElementStyle(icon.Key.ToString()) { Icon = GetPngBase64((byte[])icon.Value) });
 
-        config.Styles.Add(new Structurizr.ElementStyle("IVS") { Background = "#e7285d" });
+        // Add Colors
+        config.Styles.Add(new Structurizr.ElementStyle("IVS") { Background = "#e7285d", Color = HexConverter(Color.White) });
+        config.Styles.Add(new Structurizr.ElementStyle("Client") { Background = HexConverter(Color.Blue), Color = HexConverter(Color.White) });
+        config.Styles.Add(new Structurizr.ElementStyle("Customer") { Background = HexConverter(Color.SteelBlue), Color = HexConverter(Color.White) });
 
+
+        // Add Shapes
         config.Styles.Add(new Structurizr.ElementStyle("Database") { Shape = Structurizr.Shape.Cylinder });
         config.Styles.Add(new Structurizr.ElementStyle("Mobile App") { Shape = Structurizr.Shape.MobileDevicePortrait });
+        config.Styles.Add(new Structurizr.ElementStyle(Structurizr.Tags.Person) { Shape = Structurizr.Shape.Person });
 
-
+        // Add Relationship Styles
         config.Styles.Add(new Structurizr.RelationshipStyle(Structurizr.Tags.Relationship) { FontSize = 18, Width = 400 }); // See Relationships: https://structurizr.com/help/notation
         config.Styles.Add(new Structurizr.RelationshipStyle(Structurizr.Tags.Synchronous) { Dashed = false });
         config.Styles.Add(new Structurizr.RelationshipStyle(Structurizr.Tags.Asynchronous) { Dashed = true });
 
+
         static string GetPngBase64(byte[] imageBytes) => $"data:image/png;base64,{Convert.ToBase64String(imageBytes)}";
+
+        static string HexConverter(Color c) => $"#{c.R:X2}{c.G:X2}{c.B:X2}";
     }
 }
