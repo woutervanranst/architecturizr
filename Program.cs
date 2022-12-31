@@ -86,7 +86,7 @@ static IEnumerable<Process> GetProcesses(IServiceProvider serviceProvider, IDict
         .SelectMany(fi => processParser.Parse(fi))
         .ToArray();
 
-    if (ps.GroupBy(p => p.Name)
+    if (ps.GroupBy(p => p.FullName)
             .FirstOrDefault(g => g.Count() > 1) is { } g)
     {
         throw new Exception($"Duplicate process name: '{g.Key}' is used in {string.Join("' and '", g.Select(p => p.Source.FullName))}");

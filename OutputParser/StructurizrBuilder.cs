@@ -132,7 +132,7 @@ internal class StructurizrBuilder
         {
             var from = edge.Key.From.GetStructurizrObject();
             dynamic to = edge.Key.To.GetStructurizrObject();
-            var d = string.Join('\n', edge.Select(e => e.Process.Description).Distinct());
+            var d = string.Join('\n', edge.Select(e => e.Process.Name).Distinct());
             var i = GetInteractionStyle(edge.Key.StepType);
 
             Structurizr.Relationship r = from.Uses(to, d, "", i);
@@ -333,8 +333,8 @@ internal class StructurizrBuilder
             //var c = y.First().GetStructurizrObject().Parent as Structurizr.Container;
             var c = ((Container)nodes.Single(n => n.Key == "k8s")).GetStructurizrObject();
             //var c = p.Steps.Select(s => s.From).Concat(p.Steps.Select(s => s.To)).OfType<Container>().First().GetStructurizrObject();
-            var v = viewSet.CreateDynamicView(c, $"process-{p.Name.ToKebabCase()}", p.Name);
-            v.Title = p.Name;
+            var v = viewSet.CreateDynamicView(c, $"process-{p.FullName.ToKebabCase()}", p.FullName);
+            v.Title = p.FullName;
 
             foreach (var s in p.Steps)
             {
@@ -352,7 +352,7 @@ internal class StructurizrBuilder
 
                     if (string.IsNullOrWhiteSpace(s.Description))
                         logger.LogWarning(
-                            $"Process '{p.Name}': Description of step '{s}' is empty - may show erroneously on diagram");
+                            $"Process '{p.FullName}': Description of step '{s}' is empty - may show erroneously on diagram");
                 }
                 else
                     throw new Exception();

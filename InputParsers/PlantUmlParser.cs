@@ -59,7 +59,7 @@ internal partial class PlantUmlParser : IINputParser<Process>
             {
                 // Title
                 p.Name = r0.Value;
-                p.Description = r0.Value;
+                p.FullName = r0.Value;
                 title = r0.Value;
             }
             else if (line.StartsWith("#") || line.StartsWith("'"))
@@ -74,7 +74,7 @@ internal partial class PlantUmlParser : IINputParser<Process>
             {
                 // Participant -- ignore
             }
-            else if (SectionRegex().Match(line) is { Success: true} r4)
+            else if (SectionRegex().Match(line) is { Success: true} r1)
             {
                 // Flowchart section
                 if (p.Steps.Count != 0)
@@ -82,14 +82,14 @@ internal partial class PlantUmlParser : IINputParser<Process>
                 
                 p = new Process(fi)
                 {
-                    Name = $"{title} - {r4.Groups["sectionName"].Value}",
-                    Description = title
+                    Name = title,
+                    FullName = $"{title} - {r1.Groups["sectionName"].Value}"
                 };
             }
-            else if (SyncStepRegex().Match(line) is { Success: true } r1)
+            else if (SyncStepRegex().Match(line) is { Success: true } r2)
             {
                 // Sync step
-                var s = ParseSyncStep(r1);
+                var s = ParseSyncStep(r2);
                 p.Steps.Add(s);
             }
             else if (SyncReturnRegex().Match(line) is { Success: true } r3)
@@ -98,10 +98,10 @@ internal partial class PlantUmlParser : IINputParser<Process>
                 //var s = ParseSyncStep(r3);
                 //p.Steps.Add(s);
             }
-            else if (AsyncStepRegex().Match(line) is { Success: true } r2)
+            else if (AsyncStepRegex().Match(line) is { Success: true } r4)
             {
                 // Async step
-                var s = ParseAsyncStep(r2);
+                var s = ParseAsyncStep(r4);
                 p.Steps.Add(s);
             }
             else

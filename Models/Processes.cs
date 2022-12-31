@@ -9,11 +9,12 @@ internal class Process
 
     public FileInfo Source { get; }
     public string Name { get; set; }
-    public string Description { get; set; }
+    public string FullName { get; set; }
+
 
     public List<Step> Steps { get; } = new();
 
-    public override string ToString() => Name;
+    public override string ToString() => FullName;
 }
 
 internal abstract class Step
