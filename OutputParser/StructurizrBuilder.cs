@@ -40,10 +40,6 @@ internal class StructurizrBuilder
          * https://github.com/structurizr/java/pull/129/files#diff-b55fd8523c23d8ff04163446b3ffc28e4f93238660847d4394926df9398f7a53
          */
         
-
-        // Configure Relationship Creation Strategy
-        workspace.Model.ImpliedRelationshipsStrategy = new Structurizr.CreateImpliedRelationshipsUnlessSameRelationshipExistsStrategy(); //.CreateImpliedRelationshipsUnlessAnyRelationshipExistsStrategy(); // ! IMPORTANT, see https://github.com/structurizr/dotnet/issues/97
-
         // Add Nodes
         var nodes = GetNodesInUse(processes).Distinct().ToArray();
         AddNodes(workspace.Model, nodes);
@@ -123,12 +119,15 @@ internal class StructurizrBuilder
 
     private static void AddEdges(IEnumerable<Process> processes)
     {
-        // Group all interactions between two nodes and the interaction type
-        var edges = processes
+        // Add all DIRECT interactions:
+        //      Interactions that are explicitly mentioned in the processes
+        var rs = new List<Structurizr.Relationship>();
+        
+        var directInteractions = processes
             .SelectMany(p => p.Steps.Select(s => new { s.From, s.To, Step = s, Process = p }))
             .GroupBy(e => (e.From, e.To, StepType: e.Step.GetType()));
 
-        foreach (var edge in edges)
+        foreach (var edge in directInteractions)
         {
             var from = edge.Key.From.GetStructurizrObject();
             dynamic to = edge.Key.To.GetStructurizrObject();
@@ -136,7 +135,24 @@ internal class StructurizrBuilder
             var i = GetInteractionStyle(edge.Key.StepType);
 
             Structurizr.Relationship r = from.Uses(to, d, "", i);
+            rs.Add(r);
         }
+
+        // Add all IMPLIED interactions, based on the previous direct interactions:
+        //      Interactions that are implied between the parents of each direct interaction (eg. if 'fe-core' -> 'grpc-api' then there is a relationship between 'Frontend' and 'Kubernetes Cluster', etc)
+        var impliedInteractions = rs.SelectMany(GetImpliedRelationships)
+            .GroupBy(r => (r.Source, r.Destination, r.InteractionStyle));
+
+        foreach (var x in impliedInteractions)
+        {
+            var source = (Structurizr.StaticStructureElement)x.Key.Source;
+            dynamic to = x.Key.Destination;
+            var d = string.Join('\n', x.Select(r => r.Description).Distinct());
+            var i = x.Key.InteractionStyle;
+
+            source.Uses(to, d, "", i);
+        }
+
 
         static Structurizr.InteractionStyle GetInteractionStyle(Type t)
         {
@@ -146,6 +162,60 @@ internal class StructurizrBuilder
                 return Structurizr.InteractionStyle.Synchronous;
             else
                 throw new Exception();
+        }
+        
+        IEnumerable<(Structurizr.Element Source, Structurizr.Element Destination, string Description, Structurizr.InteractionStyle? InteractionStyle)> GetImpliedRelationships(Structurizr.Relationship relationship)
+        {
+            // NOTE: This is a fork of Structurizr.CreateImpliedRelationshipsUnlessSameRelationshipExistsStrategy
+            
+            var source = relationship.Source;
+            var destination = relationship.Destination;
+
+            while (source != null)
+            {
+                while (destination != null)
+                {
+                    if (ImpliedRelationshipIsAllowed(source, destination))
+                        if (!source.HasEfferentRelationshipWith(destination, relationship.Description))
+                            yield return (source, destination, relationship.Description, relationship.InteractionStyle);
+
+                    destination = destination.Parent;
+                }
+
+                destination = relationship.Destination;
+                source = source.Parent;
+            }
+
+            bool ImpliedRelationshipIsAllowed(Structurizr.Element source, Structurizr.Element destination)
+            {
+                if (source.Equals(destination))
+                {
+                    return false;
+                }
+
+                return !(IsChildOf(source, destination) || IsChildOf(destination, source));
+
+                bool IsChildOf(Structurizr.Element e1, Structurizr.Element e2)
+                {
+                    if (e1 is Structurizr.Person || e2 is Structurizr.Person)
+                    {
+                        return false;
+                    }
+
+                    var parent = e2.Parent;
+                    while (parent != null)
+                    {
+                        if (parent.Id.Equals(e1.Id))
+                        {
+                            return true;
+                        }
+
+                        parent = parent.Parent;
+                    }
+
+                    return false;
+                }
+            }
         }
     }
 
