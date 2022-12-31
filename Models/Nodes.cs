@@ -1,6 +1,4 @@
 ﻿namespace architecturizr.Models;
-
-
 internal abstract class Node
 {
     protected Node(string key)

@@ -32,7 +32,6 @@
   <ItemGroup>
     <Folder Include="InputParsers\" />
     <Folder Include="OutputParser\" />
-    <Folder Include="Models\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\structurizr-dotnet\Structurizr.Client\Structurizr.Client.csproj" />
