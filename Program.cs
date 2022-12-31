@@ -64,7 +64,7 @@ static async Task<(string title, string description, IDictionary<string, Node> n
 
         // Parse Nodes
         var nodeParser = serviceProvider.GetRequiredService<ExcelNodeParser>();
-        var r = nodeParser.Parse(nodeDefinitionsFile);
+        var r = nodeParser.Parse(nodeDefinitionsFile).Single();
         return r;
     }
     catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.Unauthorized)

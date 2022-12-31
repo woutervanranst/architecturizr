@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace architecturizr.InputParsers;
 
-internal partial class PlantUmlParser // : IINputParser<Process>
+internal partial class PlantUmlParser : IINputParser<Process>
 {
     public PlantUmlParser(ILogger<PlantUmlParser> logger)
     {

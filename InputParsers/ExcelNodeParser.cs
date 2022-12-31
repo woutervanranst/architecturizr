@@ -17,7 +17,7 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
         this.logger = logger;
     }
 
-    public (string title, string description, IDictionary<string, Node>) Parse(FileInfo excel)
+    public IEnumerable<(string title, string description, IDictionary<string, Node>)> Parse(FileInfo excel)
     {
         var exceptionList = new List<Exception>();
 
@@ -57,10 +57,7 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
         //Containers = nodes.Values.OfType<Container>().ToArray();
         //Components = nodes.Values.OfType<Component>().ToArray();
 
-
-
-
-        return (title, description, nodes);
+        yield return (title, description, nodes);
     }
 
     //public string Title { get; init; }
