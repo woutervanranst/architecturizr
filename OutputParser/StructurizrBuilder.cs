@@ -144,14 +144,20 @@ internal class StructurizrBuilder
         var impliedInteractions = rs.SelectMany(GetImpliedRelationships)
             .GroupBy(r => (r.Source, r.Destination, r.InteractionStyle));
 
-        foreach (var x in impliedInteractions)
+        foreach (var interaction in impliedInteractions)
         {
-            var source = (Structurizr.StaticStructureElement)x.Key.Source;
-            dynamic to = x.Key.Destination;
-            var d = string.Join('\n', x.Select(r => r.Description).Distinct());
-            var i = x.Key.InteractionStyle;
+            var source = (Structurizr.StaticStructureElement)interaction.Key.Source;
+            dynamic to = interaction.Key.Destination;
 
-            source.Uses(to, d, "", i);
+            //if (source.Name == "InvestSuite Backend at Client" &&
+            //    to.Name == "3rd Parties")
+            //{
+            //}
+
+            var d = string.Join('\n', interaction.SelectMany(i => i.Description.Split('\n')).Distinct());
+            var style = interaction.Key.InteractionStyle;
+
+            source.Uses(to, d, "", style);
         }
 
 
