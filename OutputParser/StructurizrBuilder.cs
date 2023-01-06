@@ -401,7 +401,7 @@ internal class StructurizrBuilder
         config.Styles.Add(new Structurizr.ElementStyle(Structurizr.Tags.Person) { Shape = Structurizr.Shape.Person });
 
         // Add Relationship Styles
-        config.Styles.Add(new Structurizr.RelationshipStyle(Structurizr.Tags.Relationship) { FontSize = 18, Width = 400 }); // See Relationships: https://structurizr.com/help/notation
+        config.Styles.Add(new Structurizr.RelationshipStyle(Structurizr.Tags.Relationship) { FontSize = 18, Width = 600 }); // See Relationships: https://structurizr.com/help/notation
         config.Styles.Add(new Structurizr.RelationshipStyle(Structurizr.Tags.Synchronous) { Dashed = false });
         config.Styles.Add(new Structurizr.RelationshipStyle(Structurizr.Tags.Asynchronous) { Dashed = true });
 
