@@ -30,10 +30,10 @@ internal partial class PlantUmlParser : IINputParser<Process>
     [GeneratedRegex(@"(?<from>[\w-]*) ?-> ?(?<to>[\w-]*) ?: ?\ ?(?<description>.*)")]
     private static partial Regex SyncStepRegex();
     
-    [GeneratedRegex(@"(?<from>[\w-]*) [-]?->\([0-9]\) (?<to>[\w-]*) ?: ?\[(?<topic>[\w-]*)\] ?(?<description>.*)")]
+    [GeneratedRegex(@"(?<from>[\w-]*) [-]?->\([0-9]\) (?<to>[\w-]*) ?: ?\[(?<topic>[\w-\.]*)\] ?(?<description>.*)?")]
     private static partial Regex AsyncStepRegex();
 
-    [GeneratedRegex(@"(?<to>[\w-]*) ?<-- ?(?<from>[\w-]*) ?: ?\ ?(?<description>.*)")]
+    [GeneratedRegex(@"(?<to>[\w-]*) ?<-- ?(?<from>[\w-\.]*) ?: ?\ ?(?<description>.*)?")]
     private static partial Regex SyncReturnRegex();
 
     [GeneratedRegex(@"==\s*(?<sectionName>.*?)\s*==")]
