@@ -74,6 +74,13 @@ internal partial class PlantUmlParser : IINputParser<Process>
             {
                 // Participant -- ignore
             }
+            else if (line.StartsWith("alt") || 
+                     line.StartsWith("else") || 
+                     line.StartsWith("end") ||
+                     line.StartsWith("opt"))
+            {
+                // various control statements -- ignore
+            }
             else if (SectionRegex().Match(line) is { Success: true} r1)
             {
                 // Flowchart section
