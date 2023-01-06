@@ -334,6 +334,12 @@ internal class StructurizrBuilder
     {
         foreach (var p in processes)
         {
+            if (p.Steps.Count <= 1)
+            {
+                logger.LogInformation($"Process '{p.FullName}' has only one step. Skipping.");
+                continue;
+            }
+            
             //var x = p.Steps.Select(s => s.From).Concat(p.Steps.Select(s => s.To)).GroupBy(n => n.Key);
             //var y = x.OrderBy(z => z.Count()).Last();
             //var c = y.First().GetStructurizrObject().Parent as Structurizr.Container;
