@@ -233,7 +233,7 @@ internal class StructurizrBuilder
         // Add Landscape View
         var lsv = viewSet.CreateSystemLandscapeView("landscape", "Overview");
         lsv.AddDefaultElements();
-        lsv.EnableAutomaticLayout(Structurizr.RankDirection.TopBottom, 300, 300, 300, true);
+        //lsv.EnableAutomaticLayout(Structurizr.RankDirection.TopBottom, 300, 300, 300, true);
 
         // Add System Context Diagrams: https://structurizr.com/help/system-context-diagram
         foreach (var ss in nodes.Where(n => n.Views.Contains(Views.SystemContextView)).Cast<SoftwareSystem>())
@@ -244,7 +244,7 @@ internal class StructurizrBuilder
 
             //v.AddAllElements();
             v.AddDefaultElements();
-            v.EnableAutomaticLayout(Structurizr.RankDirection.TopBottom, 300, 300, 300, true);
+            // v.EnableAutomaticLayout(Structurizr.RankDirection.TopBottom, 300, 300, 300, true);
         }
 
         // Add Container Diagrams: https://structurizr.com/help/container-diagram
@@ -256,7 +256,7 @@ internal class StructurizrBuilder
 
             //v.AddAllElements();
             v.AddDefaultElements();
-            v.EnableAutomaticLayout(Structurizr.RankDirection.TopBottom, 300, 300, 300, true);
+            // v.EnableAutomaticLayout(Structurizr.RankDirection.TopBottom, 300, 300, 300, true);
             // v.PaperSize = Structurizr.PaperSize.A0_Landscape;
         }
 
@@ -268,7 +268,7 @@ internal class StructurizrBuilder
             v.Title = $"Inside {cont.Name}";
 
             v.AddDefaultElements();
-            v.EnableAutomaticLayout(Structurizr.RankDirection.TopBottom, 300, 300, 300, true);
+            //v.EnableAutomaticLayout(Structurizr.RankDirection.TopBottom, 300, 300, 300, true);
         }
         foreach (var comp in nodes.OfType<Component>()
                 .Where(n => n.Views.Contains(Views.ComponentView))
