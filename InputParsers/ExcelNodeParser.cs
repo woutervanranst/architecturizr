@@ -99,7 +99,7 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
                 // Person
                 n = new Person(row.PersonKey)
                 {
-                    Name = row.Name,
+                    Name = row.Name ?? throw new ArgumentNullException(),
                     Description = row.Description,
                     Technology = row.Technology,
                     Tags = row.Tags
@@ -113,7 +113,7 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
                 // Software System
                 n = new SoftwareSystem(row.SoftwareSystemKey)
                 {
-                    Name = row.Name,
+                    Name = row.Name ?? throw new ArgumentNullException(),
                     Description = row.Description,
                     Technology = row.Technology,
                     Tags = row.Tags,
@@ -132,7 +132,7 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
                 
                 n = new Container(parent, row.ContainerKey)
                 {
-                    Name = row.Name,
+                    Name = row.Name ?? throw new ArgumentNullException(),
                     Description = row.Description,
                     Technology = row.Technology,
                     Tags = row.Tags,
@@ -151,7 +151,7 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
 
                 n = new Component(parent, row.ComponentKey)
                 {
-                    Name = row.Name,
+                    Name = row.Name ?? throw new ArgumentNullException(),
                     Description = row.Description,
                     Technology = row.Technology,
                     Tags = row.Tags,
