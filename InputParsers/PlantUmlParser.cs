@@ -30,7 +30,7 @@ internal partial class PlantUmlParser : IINputParser<Process>
     [GeneratedRegex(@"(?<from>[\w-]*) ?-> ?(?<to>[\w-]*) ?: ?\ ?(?<description>.*)")]
     private static partial Regex SyncStepRegex();
     
-    [GeneratedRegex(@"(?<from>[\w-]*) ?-->\([0-9]\) ?(?<to>[\w-]*) ?: ?\[(?<topic>[\w-\.]*)\] ?(?<description>.*)?")]
+    [GeneratedRegex(@"(?<from>[\w-]*) *-->\([0-9]\) ?(?<to>[\w-]*) ?: ?\[(?<topic>[\w-\.]*)\] ?(?<description>.*)?")]
     private static partial Regex AsyncStepRegex();
 
     [GeneratedRegex(@"(?<to>[\w-]*) ?<-- ?(?<from>[\w-\.]*) ?: ?\ ?(?<description>.*)?")]
@@ -38,8 +38,6 @@ internal partial class PlantUmlParser : IINputParser<Process>
 
     [GeneratedRegex(@"==\s*(?<sectionName>.*?)\s*==")]
     private static partial Regex SectionRegex();
-
-    // trade-universe-importer<--quote-provider-api:Return filtered instrument list with instruments that have quotes
 
     public IEnumerable<Process> Parse(FileInfo fi)
     {
@@ -50,7 +48,7 @@ internal partial class PlantUmlParser : IINputParser<Process>
 
         for (var i = 0; i < lines.Length; i++)
         {
-            var line = lines[i];
+            var line = lines[i].Trim();
 
             if (string.IsNullOrWhiteSpace(line))
                 continue;
