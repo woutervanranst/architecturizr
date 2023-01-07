@@ -115,6 +115,9 @@ internal class StructurizrBuilder
 
             if (!string.IsNullOrWhiteSpace(node.Owner))
                 node.GetStructurizrObject().AddTags("IVS");
+
+            if (node.Deprecated)
+                node.GetStructurizrObject().AddTags("Deprecated");
         }
     }
 
@@ -400,11 +403,11 @@ internal class StructurizrBuilder
         config.Styles.Add(new Structurizr.ElementStyle("Client") { Background = HexConverter(Color.Blue), Color = HexConverter(Color.White) });
         config.Styles.Add(new Structurizr.ElementStyle("Customer") { Background = HexConverter(Color.SteelBlue), Color = HexConverter(Color.White) });
 
-
         // Add Shapes
         config.Styles.Add(new Structurizr.ElementStyle("Database") { Shape = Structurizr.Shape.Cylinder });
         config.Styles.Add(new Structurizr.ElementStyle("Mobile App") { Shape = Structurizr.Shape.MobileDevicePortrait });
         config.Styles.Add(new Structurizr.ElementStyle(Structurizr.Tags.Person) { Shape = Structurizr.Shape.Person });
+        config.Styles.Add(new Structurizr.ElementStyle("Deprecated") { Border = Structurizr.Border.Dashed, Stroke = HexConverter(Color.Black) });
 
         // Add Relationship Styles
         config.Styles.Add(new Structurizr.RelationshipStyle(Structurizr.Tags.Relationship) { FontSize = 18, Width = 600 }); // See Relationships: https://structurizr.com/help/notation

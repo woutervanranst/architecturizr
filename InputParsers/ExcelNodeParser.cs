@@ -119,7 +119,8 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
                     Description = row.Description,
                     Technology = row.Technology,
                     Tags = row.Tags,
-                    Owner = row.Owner
+                    Owner = row.Owner,
+                    Deprecated = ParseDeprecated(row.Deprecated)
                 };
             }
             if (row.IsContainerRow)
@@ -139,7 +140,8 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
                     Description = row.Description,
                     Technology = row.Technology,
                     Tags = row.Tags,
-                    Owner = row.Owner
+                    Owner = row.Owner,
+                    Deprecated = ParseDeprecated(row.Deprecated)
                 };
             }
             if (row.IsComponentRow)
@@ -159,7 +161,8 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
                     Description = row.Description,
                     Technology = row.Technology,
                     Tags = row.Tags,
-                    Owner = row.Owner
+                    Owner = row.Owner,
+                    Deprecated = ParseDeprecated(row.Deprecated)
                 };
             }
 
@@ -184,6 +187,20 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
             
             if (Properties.Resources.ResourceManager.GetObject(node.Technology) is null)
                 logger.LogWarning($"Technology '{node.Technology}' does not have an icon defined.");
+        }
+
+        bool ParseDeprecated(string? deprecated)
+        {
+            if (deprecated is null)
+                return false;
+            else if (deprecated == "1")
+                return true;
+            else if (deprecated == "0")
+                return false;
+            else if (bool.TryParse(deprecated, out var result))
+                return result;
+            else
+                throw new InvalidOperationException($"Invalid value '{deprecated}' for 'Deprecated' column.");
         }
     }
 
