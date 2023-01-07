@@ -282,7 +282,7 @@ internal class StructurizrBuilder
 
         }
 
-        
+
 
         //foreach (var c in nodes.Where(n => n.Views.Contains(Views.ComponentView)))
         //{
@@ -292,43 +292,46 @@ internal class StructurizrBuilder
         //            0) // if this Container does not have any children (Components), the diagram will not show anything useful
         //            continue;
 
-            //        var v = viewSet.CreateComponentView(cont.GetStructurizrObject(), cont.Key,
-            //            $"What is inside/interacts with {cont.Name}");
+        //        var v = viewSet.CreateComponentView(cont.GetStructurizrObject(), cont.Key,
+        //            $"What is inside/interacts with {cont.Name}");
 
-            //        v.Title = $"[(3) Component ALL] {cont.Name}";
+        //        v.Title = $"[(3) Component ALL] {cont.Name}";
 
-            //        v.AddAllElements();
-            //        v.EnableAutomaticLayout(Structurizr.RankDirection.TopBottom, 300, 300, 300, false);
-            //    }
-            //    else if (c is Component comp)
-            //    {
-            //        if (comp.Name == "grpc-api")
-            //        {
-            //        }
+        //        v.AddAllElements();
+        //        v.EnableAutomaticLayout(Structurizr.RankDirection.TopBottom, 300, 300, 300, false);
+        //    }
+        //    else if (c is Component comp)
+        //    {
+        //        if (comp.Name == "grpc-api")
+        //        {
+        //        }
 
-            //        var v = viewSet.CreateComponentView(comp.Parent.GetStructurizrObject(), "component-" + comp.Key,
-            //            $"What interacts with {comp.Name}");
-            //        v.Title = $"[(3) Component DIRECT] {comp.Name}";
+        //        var v = viewSet.CreateComponentView(comp.Parent.GetStructurizrObject(), "component-" + comp.Key,
+        //            $"What interacts with {comp.Name}");
+        //        v.Title = $"[(3) Component DIRECT] {comp.Name}";
 
-            //        v.Add(comp.GetStructurizrObject());
-            //        v.AddNearestNeighbours(comp.GetStructurizrObject());
+        //        v.Add(comp.GetStructurizrObject());
+        //        v.AddNearestNeighbours(comp.GetStructurizrObject());
 
-            //        v.EnableAutomaticLayout();
-            //    }
-            //}
-    }
+        //        v.EnableAutomaticLayout();
+        //    }
+        //}
 
-    private static IEnumerable<Node> DirectRelationships(Node n, IEnumerable<Process> processes)
-    {
-        foreach (var p in processes)
+        static IEnumerable<Node> DirectRelationships(Node n, IEnumerable<Process> processes)
         {
-            foreach (var s in p.Steps)
+            // This is a copypaste from the structurizr code
+            foreach (var p in processes)
             {
-                if (s.From == n || s.To == n)
-                    yield return n;
+                foreach (var s in p.Steps)
+                {
+                    if (s.From == n || s.To == n)
+                        yield return n;
+                }
             }
         }
     }
+
+    
 
     private static void AddProcesses(ILogger logger, Structurizr.ViewSet viewSet, IEnumerable<Node> nodes, IEnumerable<Process> processes)
     {
@@ -375,7 +378,10 @@ internal class StructurizrBuilder
                 r.Relationship.InteractionStyle = interactionStyle;
             }
 
-            v.EnableAutomaticLayout(Structurizr.RankDirection.TopBottom, 300, 300, 300, false);
+            //if (p.Steps.Count <= 10)
+            //    v.EnableAutomaticLayout(Structurizr.RankDirection.TopBottom, 300, 300, 300, false);
+            //else
+            //    logger.LogInformation($"Process '{p.FullName}' has {p.Steps.Count} steps. Disabling automatic layout.");
         }
     }
 
