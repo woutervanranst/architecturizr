@@ -126,10 +126,9 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
                     throw new InvalidOperationException($"Row #{row.Row} matches multiple types");
 
                 // Container
-                var parent = nodes.ContainsKey(row.SoftwareSystemKey) ?
-                    (SoftwareSystem)nodes[row.SoftwareSystemKey] :
-                    throw new InvalidOperationException($"Parent '{row.SoftwareSystemKey}' of row #{row.Row} is not defined.");
-                
+                var parent = nodes.Values.OfType<SoftwareSystem>().SingleOrDefault(n => n.Key == row.SoftwareSystemKey) ??
+                             throw new InvalidOperationException($"Parent '{row.SoftwareSystemKey}' of row #{row.Row} is not defined.");
+
                 n = new Container(parent, row.ContainerKey)
                 {
                     Name = row.Name ?? throw new ArgumentNullException(),
@@ -145,10 +144,9 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
                     throw new InvalidOperationException($"Row #{row.Row} matches multiple types");
 
                 // Component
-                var parent = nodes.ContainsKey(row.ContainerKey) ?
-                    (Container)nodes[row.ContainerKey] :
-                    throw new InvalidOperationException($"Parent '{row.ContainerKey}' of row #{row.Row} is not defined.");
-
+                var parent = nodes.Values.OfType<Container>().SingleOrDefault(n => n.Key == row.ContainerKey && n.Parent.Key == row.SoftwareSystemKey) ??
+                        throw new InvalidOperationException($"Parent '{row.SoftwareSystemKey}|{row.ContainerKey}' of row #{row.Row} is not defined.");
+                
                 n = new Component(parent, row.ComponentKey)
                 {
                     Name = row.Name ?? throw new ArgumentNullException(),
