@@ -24,27 +24,38 @@ var config = new ConfigurationBuilder()
 var services = new ServiceCollection()
     .AddLogging(builder =>
     {
-        builder.AddConsole();
+        builder.AddSimpleConsole(o =>
+        {
+            o.SingleLine = true;
+        });
     })
     .AddSingleton<ExcelNodeParser>()
     .AddSingleton<PlantUmlParser>()
     .BuildServiceProvider();
 
-// Get Nodes
-var (title, description, nodes) = await GetNodesAsync(config["NodeDefinition:Url"].Value(), services);
+try
+{
+    // Get Nodes
+    var (title, description, nodes) = await GetNodesAsync(config["NodeDefinition:Url"].Value(), services);
 
-// Parse GetProcesses
-var processesDirectory = new DirectoryInfo(args[0]);
-var processes = GetProcesses(services, nodes, processesDirectory);
+    // Parse GetProcesses
+    var processesDirectory = new DirectoryInfo(args[0]);
+    var processes = GetProcesses(services, nodes, processesDirectory);
 
-// Build Structurizr Diagram
-var workspaceId = long.Parse(config["Structurizr:WorkspaceId"].Value());
-var apiKey = config["Structurizr:ApiKey"].Value(); // see https://structurizr.com/workspace/74785/settings
-var apiSecret = config["Structurizr:ApiSecret"].Value();
-var logger = services.GetRequiredService<ILogger<StructurizrBuilder>>();
+    // Build Structurizr Diagram
+    var workspaceId = long.Parse(config["Structurizr:WorkspaceId"].Value());
+    var apiKey = config["Structurizr:ApiKey"].Value(); // see https://structurizr.com/workspace/74785/settings
+    var apiSecret = config["Structurizr:ApiSecret"].Value();
+    var logger = services.GetRequiredService<ILogger<StructurizrBuilder>>();
 
-var sb = new StructurizrBuilder(logger, title, description, processes, workspaceId, apiKey, apiSecret);
-sb.CreateWorkspace();
+    var sb = new StructurizrBuilder(logger, title, description, processes, workspaceId, apiKey, apiSecret);
+    sb.CreateWorkspace();
+}
+catch (Exception e)
+{
+    services.GetRequiredService<ILogger<Program>>().LogError(e.GetFullMessage());
+}
+
 
 
 static async Task<(string title, string description, IDictionary<string, Node> nodes)> GetNodesAsync(string nodeDefinitionsUrl, IServiceProvider serviceProvider)
