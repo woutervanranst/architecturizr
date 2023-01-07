@@ -97,8 +97,9 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
             if (row.IsPersonRow)
             {
                 // Person
-                n = new Person(row.PersonKey)
+                n = new Person
                 {
+                    Key = row.PersonKey,
                     Name = row.Name ?? throw new ArgumentNullException(),
                     Description = row.Description,
                     Technology = row.Technology,
@@ -111,8 +112,9 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
                     throw new InvalidOperationException($"Row #{row.Row} matches multiple types");
                 
                 // Software System
-                n = new SoftwareSystem(row.SoftwareSystemKey)
+                n = new SoftwareSystem
                 {
+                    Key = row.SoftwareSystemKey,
                     Name = row.Name ?? throw new ArgumentNullException(),
                     Description = row.Description,
                     Technology = row.Technology,
@@ -129,8 +131,10 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
                 var parent = nodes.Values.OfType<SoftwareSystem>().SingleOrDefault(n => n.Key == row.SoftwareSystemKey) ??
                              throw new InvalidOperationException($"Parent '{row.SoftwareSystemKey}' of row #{row.Row} is not defined.");
 
-                n = new Container(parent, row.ContainerKey)
+                n = new Container
                 {
+                    Key = row.ContainerKey,
+                    Parent = parent,
                     Name = row.Name ?? throw new ArgumentNullException(),
                     Description = row.Description,
                     Technology = row.Technology,
@@ -147,8 +151,10 @@ internal class ExcelNodeParser : IINputParser<(string title, string description,
                 var parent = nodes.Values.OfType<Container>().SingleOrDefault(n => n.Key == row.ContainerKey && n.Parent.Key == row.SoftwareSystemKey) ??
                         throw new InvalidOperationException($"Parent '{row.SoftwareSystemKey}|{row.ContainerKey}' of row #{row.Row} is not defined.");
                 
-                n = new Component(parent, row.ComponentKey)
+                n = new Component
                 {
+                    Key = row.ComponentKey,
+                    Parent = parent,
                     Name = row.Name ?? throw new ArgumentNullException(),
                     Description = row.Description,
                     Technology = row.Technology,

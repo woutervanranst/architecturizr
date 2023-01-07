@@ -1,19 +1,16 @@
 ﻿namespace architecturizr.Models;
+
 internal abstract class Node
 {
-    protected Node(string key)
-    {
-        this.Key = key;
-    }
+    public required string Key { get; init; }
 
-    public string Key { get; init; }
-
-    public string Name { get; init; }
+    public required string Name { get; init; }
 
     public string Description { get; init; }
     public string? Technology { get; init; }
     public string? Tags { get; init; }
     public string? Owner { get; init; }
+    public bool Deprecated { get; init; }
 
     public List<string> Views { get; } = new();
 
@@ -56,8 +53,6 @@ internal abstract class Node
 
 internal class Person : Node
 {
-    public Person(string key) : base(key) { }
-
     public override Structurizr.Person GetStructurizrObject() => structurizrObject;
     public Structurizr.Person SetStructurizrObject(Structurizr.Person o) => structurizrObject = o;
     private Structurizr.Person structurizrObject;
@@ -65,10 +60,6 @@ internal class Person : Node
 
 internal class SoftwareSystem : Node
 {
-    public SoftwareSystem(string key) : base(key)
-    {
-    }
-
     public override Structurizr.SoftwareSystem GetStructurizrObject() => structurizrObject;
     public Structurizr.SoftwareSystem SetStructurizrObject(Structurizr.SoftwareSystem o) => structurizrObject = o;
     private Structurizr.SoftwareSystem structurizrObject;
@@ -78,32 +69,40 @@ internal class SoftwareSystem : Node
 
 internal class Container : Node
 {
-    public Container(SoftwareSystem parent, string key) : base(key)
-    {
-        Parent = parent;
-        parent.Children.Add(this);
-    }
-
     public override Structurizr.Container GetStructurizrObject() => structurizrObject;
     public Structurizr.Container SetStructurizrObject(Structurizr.Container o) => structurizrObject = o;
     private Structurizr.Container structurizrObject;
-    
-    public SoftwareSystem Parent { get; }
+
+    public required SoftwareSystem Parent
+    {
+        get => parent;
+        init
+        {
+            parent = value;
+            parent.Children.Add(this);
+        }
+    }
+    private readonly SoftwareSystem parent;
+
 
     public List<Component> Children { get; } = new List<Component>();
 }
 
 internal class Component : Node
 {
-    public Component(Container parent, string key) : base(key)
-    {
-        Parent = parent;
-        parent.Children.Add(this);
-    }
-
     public override Structurizr.Component GetStructurizrObject() => structurizrObject;
     public Structurizr.Component SetStructurizrObject(Structurizr.Component o) => structurizrObject = o;
     private Structurizr.Component structurizrObject;
 
-    public Container Parent { get; }
+    public required Container Parent
+    {
+        get => parent;
+        init
+        {
+            parent = value;
+            parent.Children.Add(this);
+        }
+    }
+    private readonly Container parent;
+
 }
