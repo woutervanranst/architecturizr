@@ -68,7 +68,7 @@ internal partial class PlantUmlParser : IINputParser<Process>
             {
                 // Note -- ignore
             }
-            else if (line.StartsWith(("participant ")))
+            else if (line.StartsWith("participant "))
             {
                 // Participant -- ignore
             }
